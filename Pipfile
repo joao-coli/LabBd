@@ -9,6 +9,7 @@ django-environ = "*"
 configparser = "*"
 djangorestframework = "*"
 pymysql = "*"
+cryptography = "*"
 
 [dev-packages]
 

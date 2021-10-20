@@ -82,15 +82,14 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'testdb',
-        'USER': 'root',
-        'PASSWORD': '123456',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'USER': 'djangouser',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'OPTIONS': {
+            'read_default_file': '/etc/mysql/my.cnf',
+        },
     },
-        'alternative': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'mydatabase',
-    }
+
 }
 
 
