@@ -9,6 +9,6 @@ def index(request):
     context = {
         'teste' : 10
     }
-    return render(request, 'base.html', context=context)
+    return render(request, 'home.html', context=context)
 
 
