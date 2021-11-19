@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<button type="button" class="btn btn-primary">Primary</button>
-<button type="submit" class="btn btn-primary">Submit</button>
+<div class="container">
+    <div class="mt-5 row row-cols-2 justify-content-evenly">
+        {% for button in buttons %}
+        <div class="col text-center">
+            <a href="#" class="m-2 w-50 btn btn-primary">{{ button.text }}</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}
