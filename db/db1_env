@@ -1,0 +1,3 @@
+POSTGRES_USER=lab_bd
+POSTGRES_PASSWORD=db1p
+POSTGRES_DB=carona_amiga

@@ -1,0 +1,53 @@
+version: "3.6"
+
+services:
+  app:
+    build:
+      context: ./backend/
+    volumes:
+      - ./backend:/app
+    ports:
+      - 8000:8000
+    networks:
+      - db1_network
+      - nginx_network
+    depends_on:
+      - db1
+    stdin_open: true
+    tty: true
+    restart: on-failure:5
+    command: >
+      sh -c "gunicorn --workers=4 --reload --chdir conf --bind 0.0.0.0:8000 conf.wsgi:application"
+
+  nginx:
+    image: nginx:1.13
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - static_volume:/static
+      - media_volume:/media
+    restart: on-failure:5
+    networks:
+      - nginx_network
+
+  db1:
+    image: postgres:10
+    env_file:
+      - ./db/db1_env
+    networks:
+      - db1_network
+    volumes:
+      - db1_volume:/var/lib/postgresql/data
+    restart: on-failure:5
+
+networks:
+  db1_network:
+    driver: bridge
+  nginx_network:
+    driver: bridge
+
+volumes:
+  db1_volume:
+  media_volume:
+  static_volume:
