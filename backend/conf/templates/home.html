@@ -5,7 +5,7 @@
     <div class="mt-5 row row-cols-2 justify-content-evenly">
         {% for button in buttons %}
         <div class="col text-center">
-            <a href="#" class="m-2 w-50 btn btn-primary">{{ button.text }}</a>
+            <a href="{{ button.url }}" class="m-2 w-50 btn btn-primary">{{ button.text }}</a>
         </div>
         {% endfor %}
     </div>
