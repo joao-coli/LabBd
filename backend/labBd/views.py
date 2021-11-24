@@ -12,7 +12,7 @@ def index(request):
         {'text': 'Procurar carona', 'url': ''},
         {'text': 'Oferecer carona', 'url': ''},
         {'text': 'Caronas realizadas', 'url': ''},
-        {'text': 'Pontos cadastrados', 'url': ''}
+        {'text': 'Pontos cadastrados', 'url': 'cadastro_ponto/'}
     ]
 
     context = {
@@ -27,3 +27,7 @@ def cadastrar_usuario(request):
     return render(request, 'cadastro_usuario.html')
 
 
+def cadastrar_ponto(request):
+    if request.method == 'POST':
+        print(request.POST["cad_ponto_nome"])
+    return render(request, 'cadastro_ponto.html')
