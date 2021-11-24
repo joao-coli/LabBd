@@ -31,8 +31,21 @@ services:
     networks:
       - nginx_network
 
+  dbadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 81:80
+    env_file:
+      - ./db/db1_pgadmin_env
+    networks:
+      - db1_network
+    depends_on:
+      - db1
+
   db1:
     image: postgres:10
+    ports:
+      - 5432:5432
     env_file:
       - ./db/db1_env
     networks:
