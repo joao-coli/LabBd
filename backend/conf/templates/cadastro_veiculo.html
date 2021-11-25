@@ -36,36 +36,6 @@
       </div>
    </div>
 
-   
-   <div class="row justify-content-center">
-      <div class="col-3 mb-4">
-       <table class="table" id="tabela_moto">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Proprietários</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <div class="row justify-content-center">
-      <div class="col-3 mb-4">
-        <select id="motorista" class="form-select" name="lugares">
-          <option selected>Motoristas</option>
-          {% for i in tabela_motoristas %}
-            <option value='{{ forloop.counter }} - teste'>{{i.2}} {{i.3}}</option>
-          {% endfor %}
-       </select>
-      </div>
-      <div class="col-1 mb-4">
-        <a class="btn" onclick="add_moto()" style="border-radius: 50%; background-color: gray; color: white">+</a>
-        </div>
-  </div>
  <center> <button id="botao" type="submit" class="btn btn-primary">Cadastrar</button> </center>
 </form>
 {% load static %}

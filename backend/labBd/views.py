@@ -54,18 +54,16 @@ def cadastrar_usuario(request):
 
 def cadastrar_veiculo(request):
     if request.method == 'POST':
-        print("VITOR")
-    cmd = '''SELECT lista_motoristas('motoristas');
-                FETCH ALL FROM motoristas'''
-    with connection.cursor() as cursor:
-        cursor.execute(cmd)
-        tabela_motoristas = cursor.fetchall()
+        dict_params = request.POST.copy()
+        dict_params.pop('csrfmiddlewaretoken')
+        cmd = ''' call CadastroPossui 
+        (2, '{0}','{1}',{3},'{2}','{4}') 
+        '''.format(*dict_params.values())
+        
+        with connection.cursor() as cursor:
+            cursor.execute(cmd)
 
-    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",tabela_motoristas)
-        # MOVE ABSOLUTE valor armazenado na tabela FROM lista_veiculos;
-
-        # FETCH 1 FROM lista_veiculos motorista escolhido
-    return render(request, 'cadastro_veiculo.html', {'range':range(6), "tabela_motoristas": tabela_motoristas})
+    return render(request, 'cadastro_veiculo.html', {'range':range(6)})
 
 def procurar_carona(request):
     if request.method == 'POST':
