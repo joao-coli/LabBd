@@ -8,7 +8,7 @@ def index(request):
 
     buttons = [
         {'text': 'Cadastrar usuário', 'url': 'cadastro_usuario/'},
-        {'text': 'Cadastrar veículo', 'url': ''},
+        {'text': 'Cadastrar veículo', 'url': 'cadastro_veiculo/'},
         {'text': 'Procurar carona', 'url': ''},
         {'text': 'Oferecer carona', 'url': 'cadastro_oferta_carona/'},
         {'text': 'Caronas realizadas', 'url': ''},
@@ -26,6 +26,10 @@ def cadastrar_usuario(request):
         print(request.POST["cad_primeiro_nome"])
     return render(request, 'cadastro_usuario.html')
 
+def cadastrar_veiculo(request):
+    if request.method == 'POST':
+        print(request.POST["cad_primeiro_nome"])
+    return render(request, 'cadastro_veiculo.html', {'range':range(6)})
 
 def cadastrar_ponto(request):
     if request.method == 'POST':
