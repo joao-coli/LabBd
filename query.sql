@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION CadastroUsuario (primeiro_nome_par VARCHAR,sobrenome_par VARCHAR,login_par VARCHAR,
+CREATE OR REPLACE FUNCTION CadastroUsuario (pass VARCHAR, primeiro_nome_par VARCHAR,sobrenome_par VARCHAR,login_par VARCHAR,
         dominio_par VARCHAR, data_nasc_par DATE, logradouro_par VARCHAR, num_par INTEGER, CEP_par VARCHAR,
         DDD1_par INTEGER ,prefixo1_par INTEGER,num1_par INTEGER,DDD2_par INTEGER,prefixo2_par INTEGER,num2_par INTEGER) returns INTEGER
 LANGUAGE plpgsql
@@ -7,15 +7,16 @@ DECLARE
 id_user INTEGER;
 BEGIN
 --comandos
-    INSERT INTO usuario (primeiro_nome, sobrenome, login, dominio, data_nasc,num, logradouro, CEP, DDD1, prefixo1, num1, DDD2, prefixo2, num2)
-                         VALUES (primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par,num_par, logradouro_par, CEP_par, DDD1_par, prefixo1_par, num1_par, DDD2_par, prefixo2_par, num2_par)
+    INSERT INTO usuario ("password", email, date_joined, primeiro_nome, sobrenome, login, dominio, data_nasc,num, logradouro, CEP, DDD1, prefixo1, num1, DDD2, prefixo2, num2, is_active, is_superuser, is_staff)
+                         VALUES (pass, 'lab_bd@gmail.com', localtime, primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par,num_par, logradouro_par, CEP_par, DDD1_par, prefixo1_par, num1_par, DDD2_par, prefixo2_par, num2_par, 'true', 'false', 'false')
                          RETURNING id_usuario into id_user;
                          
     RETURN id_user;
 COMMIT;
 END;$$;
 
-
+update usuario set is_active = 't', is_superuser = 'no', is_staff = 'n' where id_usuario = 6
+select * from usuario
 CREATE OR REPLACE PROCEDURE InserePassageiro (cpf_par varchar(11), id_usuario_par int)
 LANGUAGE plpgsql
 AS $$
@@ -36,7 +37,7 @@ COMMIT;
 END;$$;
 
 
-CREATE OR REPLACE PROCEDURE CadastroPassageiro (cpf_par varchar(11), primeiro_nome_par VARCHAR,sobrenome_par VARCHAR,login_par VARCHAR,
+CREATE OR REPLACE PROCEDURE CadastroPassageiro (pass varchar, cpf_par varchar(11), primeiro_nome_par VARCHAR,sobrenome_par VARCHAR,login_par VARCHAR,
         dominio_par VARCHAR, data_nasc_par DATE, logradouro_par VARCHAR, num_par INTEGER, CEP_par VARCHAR,
         DDD1_par INTEGER ,prefixo1_par INTEGER,num1_par INTEGER,DDD2_par INTEGER,prefixo2_par INTEGER,num2_par INTEGER)
 LANGUAGE plpgsql
@@ -45,7 +46,7 @@ DECLARE
 id_user INTEGER;
 BEGIN
 --comandos
-    id_user = CadastroUsuario(primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par, 
+    id_user = CadastroUsuario(pass, primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par, 
                                                             logradouro_par, num_par, CEP_par, DDD1_par, prefixo1_par, num1_par, DDD2_par,
                                                             prefixo2_par, num2_par);
     call InserePassageiro(cpf_par, id_user);
@@ -53,7 +54,7 @@ COMMIT;
 END;$$;
 
 
-CREATE OR REPLACE PROCEDURE CadastroMotorista (numero_cnh_par int, data_validade_cnh_par date, primeiro_nome_par VARCHAR,
+CREATE OR REPLACE PROCEDURE CadastroMotorista (pass varchar, numero_cnh_par int, data_validade_cnh_par date, primeiro_nome_par VARCHAR,
         sobrenome_par VARCHAR,login_par VARCHAR, dominio_par VARCHAR, data_nasc_par DATE, logradouro_par VARCHAR, num_par INTEGER,
         CEP_par VARCHAR,DDD1_par INTEGER ,prefixo1_par INTEGER,num1_par INTEGER,DDD2_par INTEGER,prefixo2_par INTEGER,num2_par INTEGER)
 LANGUAGE plpgsql
@@ -62,7 +63,7 @@ DECLARE
 id_user INTEGER;
 BEGIN
 --comandos
-    id_user = CadastroUsuario(primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par, 
+    id_user = CadastroUsuario(pass, primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par, 
                                                             logradouro_par, num_par, CEP_par, DDD1_par, prefixo1_par, num1_par, DDD2_par,
                                                             prefixo2_par, num2_par);
     call InsereMotorista(numero_cnh_par, data_validade_cnh_par, id_user);
@@ -70,7 +71,7 @@ COMMIT;
 END;$$;
 
 
-CREATE OR REPLACE PROCEDURE CadastroPassageiroMotorista (cpf_par varchar(11),numero_cnh_par int, data_validade_cnh_par date, primeiro_nome_par VARCHAR,
+CREATE OR REPLACE PROCEDURE CadastroPassageiroMotorista (pass varchar, cpf_par varchar(11),numero_cnh_par int, data_validade_cnh_par date, primeiro_nome_par VARCHAR,
         sobrenome_par VARCHAR,login_par VARCHAR, dominio_par VARCHAR, data_nasc_par DATE, logradouro_par VARCHAR, num_par INTEGER,
         CEP_par VARCHAR,DDD1_par INTEGER ,prefixo1_par INTEGER,num1_par INTEGER,DDD2_par INTEGER,prefixo2_par INTEGER,num2_par INTEGER)
 LANGUAGE plpgsql
@@ -79,7 +80,7 @@ DECLARE
 id_user INTEGER;
 BEGIN
 --comandos
-    id_user = CadastroUsuario(primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par, 
+    id_user = CadastroUsuario(pass, primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par, 
                                                             logradouro_par, num_par, CEP_par, DDD1_par, prefixo1_par, num1_par, DDD2_par,
                                                             prefixo2_par, num2_par);
     call InserePassageiro(cpf_par, id_user);
@@ -100,15 +101,15 @@ BEGIN
 END; $$;
 
 CREATE PROCEDURE insere_ponto (_latitude in int, _longitude in int, 
-							   _cep in varchar, _num in int,
-							   _logradouro in varchar, _nome in varchar, 
-							   _ponto_referencia in varchar DEFAULT NULL::varchar)
+                               _cep in varchar, _num in int,
+                               _logradouro in varchar, _nome in varchar, 
+                               _ponto_referencia in varchar DEFAULT NULL::varchar)
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	insert into PONTO (latitude,longitude,cep,num,logradouro,ponto_referencia,nome) 
-	values(_latitude,_longitude,_cep,_num,_logradouro, _ponto_referencia,_nome);
-	COMMIT;
+    insert into PONTO (latitude,longitude,cep,num,logradouro,ponto_referencia,nome) 
+    values(_latitude,_longitude,_cep,_num,_logradouro, _ponto_referencia,_nome);
+    COMMIT;
 END; $$;
 
 
@@ -203,13 +204,13 @@ CREATE OR REPLACE VIEW pontos_registrados AS SELECT
 
 CREATE OR REPLACE VIEW lista_caronas_oferecidas AS
 SELECT o.data_partida, 
-	o.horario_partida,
-	o.vagas_ofertadas,
-	o.vagas_disponiveis,
-	v.modelo, 
-	v.placa,
-	moto.id_usuario
+    o.horario_partida,
+    o.vagas_ofertadas,
+    o.vagas_disponiveis,
+    v.modelo, 
+    v.placa,
+    moto.id_usuario
     FROM oferta_de_carona o 
-	INNER JOIN possui p ON (o.id_possui = p.id_possui)
-	INNER JOIN veiculo v ON (p.placa = v.placa)
-	INNER JOIN motorista moto ON (p.id_motorista = moto.id_usuario)
+    INNER JOIN possui p ON (o.id_possui = p.id_possui)
+    INNER JOIN veiculo v ON (p.placa = v.placa)
+    INNER JOIN motorista moto ON (p.id_motorista = moto.id_usuario)

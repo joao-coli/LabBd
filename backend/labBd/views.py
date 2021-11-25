@@ -7,19 +7,34 @@ from .models import *
 from django.db import connection
 from datetime import datetime
 
+from django.contrib.auth.hashers import make_password
+
 @login_required
 def index(request):
     """View principal do projeto"""
 
-    buttons = [
-        {'text': 'Cadastrar usuário', 'url': 'cadastro_usuario/'},
-        {'text': 'Cadastrar veículo', 'url': 'cadastro_veiculo/'},
-        {'text': 'Procurar carona', 'url': 'procurar_carona/'},
-        {'text': 'Oferecer carona', 'url': 'cadastro_oferta_carona/'},
-        {'text': 'Caronas realizadas', 'url': ''},
-        {'text': 'Pontos cadastrados', 'url': 'listar_pontos/'}
-        #{'text': 'Cadastrar Ponto', 'url': 'cadastro_ponto/'}
-    ]
+    if request.user.is_superuser: 
+        buttons = [
+                {'text': 'Cadastrar usuário', 'url': 'cadastro_usuario/'},
+                {'text': 'Cadastrar veículo', 'url': 'cadastro_veiculo/'},
+                {'text': 'Procurar carona', 'url': 'procurar_carona/'},
+                {'text': 'Oferecer carona', 'url': 'cadastro_oferta_carona/'},
+                {'text': 'Caronas realizadas', 'url': ''},
+                {'text': 'Pontos cadastrados', 'url': 'listar_pontos/'}
+
+            #{'text': 'Cadastrar Ponto', 'url': 'cadastro_ponto/'}
+        ]
+    else:
+        buttons = [
+                {'text': 'Cadastrar usuário', 'url': '#'},
+                {'text': 'Cadastrar veículo', 'url': 'cadastro_veiculo/'},
+                {'text': 'Procurar carona', 'url': 'procurar_carona/'},
+                {'text': 'Oferecer carona', 'url': 'cadastro_oferta_carona/'},
+                {'text': 'Caronas realizadas', 'url': ''},
+                {'text': 'Pontos cadastrados', 'url': 'listar_pontos/'}
+
+            #{'text': 'Cadastrar Ponto', 'url': 'cadastro_ponto/'}
+        ]
 
     context = {
         'buttons': buttons
@@ -44,32 +59,36 @@ def consultar_oferta_caronas(request):
 
 @login_required
 def cadastrar_usuario(request):
-    if request.method == 'POST':
-        dict_params = request.POST.copy()
-        dict_params.pop('csrfmiddlewaretoken')
-        if 'cad_cbox_motorista' in request.POST.keys():
-            dict_params.pop('cad_cbox_motorista')
-            if 'cad_cbox_passageiro' in request.POST.keys():
-                print("Cadastra os dois")
-                dict_params.pop('cad_cbox_passageiro')
-                cmd = ''' call cadastropassageiromotorista ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}',{9},'{10}',{11},{12},{13},{14},{15},{16}) '''.format(*dict_params.values())
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            dict_params = request.POST.copy()
+            dict_params.pop('csrfmiddlewaretoken')
+            dict_params['password'] = make_password(dict_params['password'])
+            if 'cad_cbox_motorista' in request.POST.keys():
+                dict_params.pop('cad_cbox_motorista')
+                if 'cad_cbox_passageiro' in request.POST.keys():
+                    print("Cadastra os dois")
+                    dict_params.pop('cad_cbox_passageiro')
+                    cmd = ''' call cadastropassageiromotorista ('{7}','{0}','{1}','{2}','{3}','{4}','{5}','{6}','{8}','{9}',{10},'{11}',{12},{13},{14},{15},{16},{17}) '''.format(*dict_params.values())
+                else:
+                    dict_params.pop('cad_cpf')
+                    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAA", dict_params.keys())
+                    cmd = ''' call cadastromotorista ('{7}','{0}','{1}','{2}','{3}','{4}','{5}','{6}','{8}',{9},'{10}',{11},{12},{13},{14},{15},{16}) '''.format(*dict_params.values())
+            elif 'cad_cbox_passageiro' in request.POST.keys():
+                dict_params.pop('cad_cbox_passageiro') 
+                dict_params.pop('cad_numero_cnh')
+                dict_params.pop('cad_validade_cnh')
+                print('Cadastra só passageiro')
+                cmd = ''' call cadastropassageiro ('{7}','{0}','{1}','{2}','{3}','{4}','{5}','{6}',{8},'{9}',{10},{11},{12},{13},{14},{15}) '''.format(*dict_params.values())
             else:
-                dict_params.pop('cad_cpf')
-                print("Cadastra só o motorista")
-                cmd = ''' call cadastromotorista ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}',{8},'{9}',{10},{11},{12},{13},{14},{15}) '''.format(*dict_params.values())
-        elif 'cad_cbox_passageiro' in request.POST.keys():
-            dict_params.pop('cad_cbox_passageiro') 
-            dict_params.pop('cad_numero_cnh')
-            dict_params.pop('cad_validade_cnh')
-            print('Cadastra só passageiro')
-            cmd = ''' call cadastropassageiro ('{0}','{1}','{2}','{3}','{4}','{5}','{6}',{7},'{8}',{9},{10},{11},{12},{13},{14}) '''.format(*dict_params.values())
-        else:
-            return render(request, 'cadastro_usuario.html')
-            
-        with connection.cursor() as cursor:
-            cursor.execute(cmd)
+                return render(request, 'cadastro_usuario.html')
+                
+            with connection.cursor() as cursor:
+                cursor.execute(cmd)
+        return render(request, 'cadastro_usuario.html')
 
-    return render(request, 'cadastro_usuario.html')
+    return render(request, 'home.html')
+
 
 @login_required
 def cadastrar_veiculo(request):
