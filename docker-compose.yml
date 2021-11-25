@@ -43,7 +43,7 @@ services:
       - db1
 
   db1:
-    image: postgres:10
+    image: postgres:14
     ports:
       - 5432:5432
     env_file:

@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': 'carona_amiga',
         'USER': 'lab_bd',
         'PASSWORD': 'db1p',
-        'HOST': 'localhost',
+        'HOST': 'db1',
         'PORT': '5432',
     },
 
@@ -128,7 +128,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = './'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_DIRS = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
