@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': 'carona_amiga',
         'USER': 'lab_bd',
         'PASSWORD': 'db1p',
-        'HOST': 'localhost',
+        'HOST': 'db1',
         'PORT': '5432',
     },
 
