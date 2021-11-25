@@ -2,14 +2,36 @@
 
 {% block content %}
 
-<table>
-    {% for row0 in COMP %} 
-    <tr>
+
+<h1 class="row justify-content-center">Pontos Registrados</h1>
+<hr>
+
+
+<div class="row justify-content-center">
+  <div class="col-10 mb-4">
+    <table class="table">
+      <tr>
+        <th scope="col">#</th> 
+        <th scope="col">DATA PARTIDA</th>
+        <th scope="col">HORÁRIO PARTIDA</th> 
+        <th scope="col">VAGAS OFERTADAS</th>
+        <th scope="col">VAGAS DISPONIVEIS</th> 
+        <th scope="col">MODELO DO VEICULO</th>
+        <th scope="col">PLACA</th> 
+      </tr>
+        {% for row0 in caronas_oferecidas %} 
+      <tr>
+        <td scope="row"></td>
         <td>{{ row0.0 }}</td>
         <td>{{ row0.1 }}</td>
         <td>{{ row0.2 }}</td>
-            {% endfor %}
-    </tr>
-  </table>
+        <td>{{ row0.3 }}</td>
+        <td>{{ row0.4 }}</td>
+        <td>{{ row0.5 }}</td>
+        {% endfor %}
+      </tr>
+    </table>
+  </div>
+</div>
 
 {% endblock %}

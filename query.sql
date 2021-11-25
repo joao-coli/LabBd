@@ -197,3 +197,6 @@ CREATE OR REPLACE PROCEDURE insere_passa_por(ID_oferta_de_carona_p in INTEGER,id
                                   VALUES (ID_oferta_de_carona_p,id_ponto_p, ponto_final_p, ponto_inicial_p);
             COMMIT;
         END; $$;
+
+CREATE OR REPLACE VIEW pontos_registrados AS SELECT
+  * FROM ponto;
