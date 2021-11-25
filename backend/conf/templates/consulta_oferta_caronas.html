@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<table>
+    {% for row0 in COMP %} 
+    <tr>
+        <td>{{ row0.0 }}</td>
+        <td>{{ row0.1 }}</td>
+        <td>{{ row0.2 }}</td>
+            {% endfor %}
+    </tr>
+  </table>
+
+{% endblock %}

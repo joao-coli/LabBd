@@ -87,17 +87,6 @@ BEGIN
 COMMIT;
 END;$$;
 
-select * from 
-usuario
---motorista
---passageiro
-
-call cadastropassageiromotorista('11122233345','111555','10/12/2022','Ricardo', 'oliveira', 'login', 'dominio', '01/01/2001', 'Rua Imp', 56, '181818', 11, 1, 123, 22, 2, 234);
-
-call cadastropassageiro('33344455567','Leo', 'oliveira', 'login', 'dominio', '01/01/2001', 'Rua Imp', 56, '181818', 11, 1, 123, 22, 2, 234);
-
-call cadastromotorista('777777','01/10/2025','Ricardo 10', 'Szram', 'login', 'dominio', '01/01/2001', 'Rua Imp', 56, '181818', 11, 1, 123, 22, 2, 234);
-
 CREATE OR REPLACE FUNCTION lista_motoristas (refcursor) RETURNS REFCURSOR
 LANGUAGE plpgsql
 AS $$
@@ -108,7 +97,7 @@ BEGIN
     RETURN $1;
 
     COMMIT;
-END; $$
+END; $$;
 
 CREATE PROCEDURE insere_ponto (_latitude in int, _longitude in int, 
 							   _cep in varchar, _num in int,
@@ -120,14 +109,8 @@ BEGIN
 	insert into PONTO (latitude,longitude,cep,num,logradouro,ponto_referencia,nome) 
 	values(_latitude,_longitude,_cep,_num,_logradouro, _ponto_referencia,_nome);
 	COMMIT;
-END; $$
+END; $$;
 
--- Usando o Procedure
-
-CALL insere_ponto (-43,-56,'07197063',109,'Rua Francisco Alves','Ricardo');
-CALL insere_ponto (-49,-76,'13450000',690,'Rua Palmeiras do Amaral','Leo', 'Cemitério');
-
-select * from PONTO;
 
 CREATE OR REPLACE PROCEDURE CadastroPossui
 -- params
@@ -142,7 +125,7 @@ BEGIN
     END IF;
     INSERT INTO POSSUI (id_motorista, placa) VALUES (id_user, placa_p);
 COMMIT;
-END; $$
+END; $$;
 
 CREATE OR REPLACE PROCEDURE CadastroVeiculo
 -- params
@@ -157,7 +140,7 @@ CREATE OR REPLACE FUNCTION lista_veiculos_disponiveis (refcursor, cod_motorista 
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    OPEN $1 FOR SELECT p.placa, v.modelo, v.n_assentos, v.cor, v.ano 
+    OPEN $1 FOR SELECT p.id_possui, p.placa, v.modelo, v.n_assentos, v.cor, v.ano 
         FROM possui p
         INNER JOIN veiculo v ON (p.placa = v.placa)
         WHERE id_motorista = cod_motorista;
@@ -165,7 +148,7 @@ BEGIN
     RETURN $1;
 
     COMMIT;
-END; $$
+END; $$;
 
 CREATE OR REPLACE FUNCTION pontos(REFCURSOR) RETURNS REFCURSOR
 LANGUAGE plpgsql
@@ -174,12 +157,7 @@ $$
 BEGIN
     OPEN $1 FOR SELECT id_ponto, nome, logradouro, num, cep FROM ponto;
     RETURN $1;
-END; $$
-
-begin;
-SELECT pontos('pontos')
-FETCH ALL FROM pontos
-commit
+END; $$;
 
 CREATE OR REPLACE PROCEDURE cadastro_oferta_carona(ID_Possui_Ofertante in INT, data_partida_oferta in DATE, 
                                                    hora_partida_oferta in TIME, n_vagas_oferta in INT, 
@@ -209,7 +187,7 @@ CREATE OR REPLACE FUNCTION insere_oferta_carona(ID_Possui_Ofertante in INT, data
                                       n_vagas_oferta) RETURNING id_oferta_de_carona into id_oferta_carona;
         RETURN id_oferta_carona;
         COMMIT;
-    END; $$
+    END; $$;
 
 CREATE OR REPLACE PROCEDURE insere_passa_por(ID_oferta_de_carona_p in INTEGER,id_ponto_p in INTEGER,
                                   ponto_final_p in BOOLEAN, ponto_inicial_p in BOOLEAN)
@@ -218,4 +196,4 @@ CREATE OR REPLACE PROCEDURE insere_passa_por(ID_oferta_de_carona_p in INTEGER,id
             INSERT INTO PASSA_POR (ID_oferta_de_carona,id_ponto, ponto_final, ponto_inicial)
                                   VALUES (ID_oferta_de_carona_p,id_ponto_p, ponto_final_p, ponto_inicial_p);
             COMMIT;
-        END; $$
+        END; $$;
