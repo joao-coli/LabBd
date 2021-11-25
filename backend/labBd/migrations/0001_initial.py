@@ -11,12 +11,203 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='Motorista',
-            fields=[
-                ('nome', models.CharField(default='', max_length=70)),
-                ('carro', models.CharField(default='', max_length=200)),
-                ('id', models.IntegerField(primary_key=True, serialize=False)),
-            ],
-        ),
+        # Creating tables --------------------------
+        migrations.RunSQL("""
+        CREATE TABLE USUARIO(
+            ID_Usuario SERIAL,
+            primeiro_nome VARCHAR(50) NOT NULL, 
+            sobrenome VARCHAR(50) NOT NULL, 
+            login VARCHAR(50) NOT NULL, 
+            dominio VARCHAR(50) NOT NULL, 
+            data_nasc DATE NOT NULL, 
+            num INT NOT NULL, 
+            logradouro VARCHAR(50) NOT NULL, 
+            CEP VARCHAR(9) NOT NULL,
+            DDD1 INT NOT NULL, 
+            prefixo1 INT NOT NULL,
+            num1 INT NOT NULL,
+            DDD2 INT,
+            prefixo2 INT,
+            num2 INT,
+
+            PRIMARY KEY (ID_Usuario)
+        );
+        """),
+
+        migrations.RunSQL("""
+        CREATE TABLE PASSAGEIRO(
+            CPF VARCHAR(11) NOT NULL,
+            ID_Usuario INT NOT NULL,
+            nota_media real,
+            
+            CONSTRAINT FK_USUARIO FOREIGN KEY (ID_Usuario) REFERENCES USUARIO(ID_Usuario) ON DELETE CASCADE,
+            PRIMARY KEY (CPF)
+        );
+        """),
+
+        migrations.RunSQL("""
+        CREATE TABLE MOTORISTA(
+            numero_CNH INT NOT NULL,
+            data_validade_CNH DATE NOT NULL,
+            ID_Usuario INT NOT NULL,
+            nota_media real,
+
+            CONSTRAINT FK_USUARIO FOREIGN KEY (ID_Usuario) REFERENCES USUARIO(ID_Usuario) ON DELETE CASCADE,
+            UNIQUE (numero_CNH, data_validade_CNH),
+            PRIMARY KEY (ID_Usuario)
+        );
+        """),
+        
+        migrations.RunSQL("""
+        CREATE TABLE VEICULO(
+            placa VARCHAR(7) NOT NULL,
+            modelo VARCHAR(255) NOT NULL,
+            n_assentos INT NOT NULL,
+            cor VARCHAR(50) NOT NULL,
+            ano INT NOT NULL,
+
+            PRIMARY KEY (placa)
+        );
+        """),
+
+        migrations.RunSQL("""
+        CREATE TABLE PONTO(
+	
+            ID_Ponto SERIAL,
+            latitude INT NOT NULL, 
+            longitude INT NOT NULL, 
+            CEP VARCHAR(9) NOT NULL, 
+            num INT NOT NULL, 
+            logradouro VARCHAR(50) NOT NULL, 
+            ponto_referencia VARCHAR(100), 
+            nome VARCHAR(50) NOT NULL,
+            
+            UNIQUE (latitude, longitude),
+            PRIMARY KEY (ID_Ponto)
+
+        );
+        """),
+
+        migrations.RunSQL("""
+        CREATE TABLE POSSUI(
+	
+            ID_Possui SERIAL,
+            ID_Motorista INT NOT NULL,
+            placa VARCHAR(7) NOT NULL,
+            
+            CONSTRAINT FK_MOTORISTA FOREIGN KEY (ID_Motorista) 
+                REFERENCES MOTORISTA(ID_Usuario),
+            CONSTRAINT FK_VEICULO FOREIGN KEY (placa) REFERENCES VEICULO(placa) ON DELETE CASCADE,
+            
+            UNIQUE (ID_Motorista, placa),
+            PRIMARY KEY (ID_Possui)
+
+        );
+        """),
+
+        migrations.RunSQL("""
+        CREATE TABLE AGENDAMENTO(
+            ID_Agendamento SERIAL,
+            CPF VARCHAR(11) NOT NULL, 
+            horario_agendamento TIMESTAMP NOT NULL, 
+            ID_Ponto_Origem INT NOT NULL, 
+            ID_Ponto_Destino INT NOT NULL, 
+            data_partida DATE NOT NULL, 
+            horario_partida TIME NOT NULL, 
+            atraso_aceitável INT NOT NULL, 
+            adiantam_aceitavel INT NOT NULL,
+            ativo SMALLINT NOT NULL DEFAULT 1,
+
+            CONSTRAINT FK_PASSAGEIRO FOREIGN KEY (CPF) REFERENCES PASSAGEIRO(CPF) ON DELETE CASCADE,
+            CONSTRAINT FK_PONTO_ORIGEM FOREIGN KEY (ID_Ponto_Origem) 
+                REFERENCES PONTO(ID_Ponto) ON DELETE CASCADE,
+            CONSTRAINT FK_PONTO_DESTINO FOREIGN KEY (ID_Ponto_Destino) 
+                REFERENCES PONTO(ID_Ponto) ON DELETE CASCADE,
+            
+            UNIQUE (CPF, horario_agendamento),
+            PRIMARY KEY (ID_Agendamento)
+        );
+        """),
+
+        migrations.RunSQL("""
+        CREATE TABLE OFERTA_DE_CARONA(
+            ID_Oferta_De_Carona SERIAL,
+            ID_Possui INT NOT NULL,
+            data_partida DATE NOT NULL,
+            horario_partida TIME NOT NULL,
+            vagas_ofertadas INT NOT NULL,
+            vagas_disponiveis INT,
+
+            CONSTRAINT FK_POSSUI FOREIGN KEY (ID_Possui) 
+                REFERENCES Possui(ID_Possui) ON DELETE CASCADE,
+            
+            UNIQUE (ID_Possui, data_partida, horario_partida),
+            PRIMARY KEY (ID_Oferta_De_Carona)
+        );
+        """),
+
+        migrations.RunSQL("""
+        CREATE TABLE _MATCH(
+            ID_Match SERIAL,
+            ID_Agendamento INT NOT NULL,
+            ID_Oferta_De_Carona INT NOT NULL,
+
+
+            CONSTRAINT FK_OFERTA_DE_CARONA FOREIGN KEY (ID_Oferta_De_Carona)
+                REFERENCES OFERTA_DE_CARONA(ID_Oferta_De_Carona) ON DELETE CASCADE,
+            CONSTRAINT FK_AGENDAMENTO FOREIGN KEY (ID_Agendamento) 
+                REFERENCES AGENDAMENTO(ID_Agendamento) ON DELETE CASCADE,
+            
+            UNIQUE (ID_Agendamento, ID_Oferta_De_Carona),
+            PRIMARY KEY (ID_Match)
+        );
+        """),
+
+        migrations.RunSQL("""
+        CREATE TABLE RESERVA(
+            ID_Reserva SERIAL,
+            ID_Match INT NOT NULL,
+
+            CONSTRAINT FK_MATCH FOREIGN KEY (ID_Match) 
+                REFERENCES _MATCH(ID_Match) ON DELETE CASCADE,
+            
+            UNIQUE (ID_Match),
+            PRIMARY KEY (ID_Reserva)
+        );
+        """),
+
+        migrations.RunSQL("""
+        CREATE TABLE CARONA(
+            ID_Reserva INT NOT NULL,
+            horario_saida TIME NOT NULL, 
+            horario_chegada TIME, 
+            avaliacao_motorista TEXT, 
+            avaliacao_passageiro TEXT,
+            nota_passageiro INT,
+            nota_motorista INT,
+
+            CONSTRAINT FK_RESERVA FOREIGN KEY (ID_Reserva)
+                REFERENCES RESERVA(ID_Reserva) ON DELETE CASCADE,
+            
+            PRIMARY KEY (ID_Reserva, horario_saida, horario_chegada)
+
+        );
+        """),
+
+        migrations.RunSQL("""
+        CREATE TABLE PASSA_POR(
+            ID_Oferta_De_Carona INT NOT NULL,
+            ID_Ponto INT NOT NULL,
+            ponto_final BOOLEAN NOT NULL,
+            ponto_inicial BOOLEAN NOT NULL,
+
+            CONSTRAINT FK_OFERTA_DE_CARONA FOREIGN KEY (ID_Oferta_De_Carona)
+                REFERENCES OFERTA_DE_CARONA(ID_Oferta_De_Carona) ON DELETE CASCADE,
+            CONSTRAINT FK_PONTO FOREIGN KEY (ID_Ponto) 
+                REFERENCES PONTO(ID_Ponto) ON DELETE CASCADE,
+            
+            PRIMARY KEY (ID_Oferta_De_Carona, ID_Ponto)
+        );
+
+        """),
     ]
