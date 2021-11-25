@@ -69,17 +69,28 @@ def cadastrar_usuario(request):
                 if 'cad_cbox_passageiro' in request.POST.keys():
                     print("Cadastra os dois")
                     dict_params.pop('cad_cbox_passageiro')
-                    cmd = ''' call cadastropassageiromotorista ('{7}','{0}','{1}','{2}','{3}','{4}','{5}','{6}','{8}','{9}',{10},'{11}',{12},{13},{14},{15},{16},{17}) '''.format(*dict_params.values())
+                    cmd = ''' call cadastropassageiromotorista ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}',{10},'{11}',{12},{13},{14},{15},{16},{17}) '''.format(
+                        make_password(request.POST['password']), request.POST['cad_cpf'], request.POST['cad_numero_cnh'], request.POST['cad_validade_cnh'], request.POST['cad_primeiro_nome'], request.POST['cad_sobrenome'], request.POST['cad_login'], 
+                        request.POST['cad_dominio'], request.POST['cad_data_nascimento'], request.POST['cad_logradouro'], 
+                        request.POST['cad_numero'], request.POST['cad_cep'], request.POST['cad_ddd1'], request.POST['cad_pref1'], 
+                        request.POST['cad_telefone1'], request.POST['cad_ddd2'], request.POST['cad_pref2'], request.POST['cad_telefone2'])
                 else:
                     dict_params.pop('cad_cpf')
-                    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAA", dict_params.keys())
-                    cmd = ''' call cadastromotorista ('{7}','{0}','{1}','{2}','{3}','{4}','{5}','{6}','{8}',{9},'{10}',{11},{12},{13},{14},{15},{16}) '''.format(*dict_params.values())
+                    cmd = ''' call cadastromotorista ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}',{9},'{10}',{11},{12},{13},{14},{15},{16}) '''.format(
+                        make_password(request.POST['password']), request.POST['cad_numero_cnh'], request.POST['cad_validade_cnh'], request.POST['cad_primeiro_nome'], request.POST['cad_sobrenome'], request.POST['cad_login'], 
+                        request.POST['cad_dominio'], request.POST['cad_data_nascimento'], request.POST['cad_logradouro'], 
+                        request.POST['cad_numero'], request.POST['cad_cep'], request.POST['cad_ddd1'], request.POST['cad_pref1'], 
+                        request.POST['cad_telefone1'], request.POST['cad_ddd2'], request.POST['cad_pref2'], request.POST['cad_telefone2'])
             elif 'cad_cbox_passageiro' in request.POST.keys():
                 dict_params.pop('cad_cbox_passageiro') 
                 dict_params.pop('cad_numero_cnh')
                 dict_params.pop('cad_validade_cnh')
                 print('Cadastra só passageiro')
-                cmd = ''' call cadastropassageiro ('{7}','{0}','{1}','{2}','{3}','{4}','{5}','{6}',{8},'{9}',{10},{11},{12},{13},{14},{15}) '''.format(*dict_params.values())
+                cmd = ''' call cadastropassageiro ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}',{8},'{9}',{10},{11},{12},{13},{14},{15}) '''.format(
+                    make_password(request.POST['password']), request.POST['cad_cpf'], request.POST['cad_primeiro_nome'], request.POST['cad_sobrenome'], request.POST['cad_login'], 
+                        request.POST['cad_dominio'], request.POST['cad_data_nascimento'], request.POST['cad_logradouro'], 
+                        request.POST['cad_numero'], request.POST['cad_cep'], request.POST['cad_ddd1'], request.POST['cad_pref1'], 
+                        request.POST['cad_telefone1'], request.POST['cad_ddd2'], request.POST['cad_pref2'], request.POST['cad_telefone2'])
             else:
                 return render(request, 'cadastro_usuario.html')
                 

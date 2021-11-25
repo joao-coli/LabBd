@@ -8,15 +8,14 @@ id_user INTEGER;
 BEGIN
 --comandos
     INSERT INTO usuario ("password", email, date_joined, primeiro_nome, sobrenome, login, dominio, data_nasc,num, logradouro, CEP, DDD1, prefixo1, num1, DDD2, prefixo2, num2, is_active, is_superuser, is_staff)
-                         VALUES (pass, 'lab_bd@gmail.com', localtime, primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par,num_par, logradouro_par, CEP_par, DDD1_par, prefixo1_par, num1_par, DDD2_par, prefixo2_par, num2_par, 'true', 'false', 'false')
+                         VALUES (pass, 'lab_bd@gmail.com', localtimestamp, primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par,num_par, logradouro_par, CEP_par, DDD1_par, prefixo1_par, num1_par, DDD2_par, prefixo2_par, num2_par, 'true', 'false', 'false')
                          RETURNING id_usuario into id_user;
                          
     RETURN id_user;
 COMMIT;
 END;$$;
 
-update usuario set is_active = 't', is_superuser = 'no', is_staff = 'n' where id_usuario = 6
-select * from usuario
+
 CREATE OR REPLACE PROCEDURE InserePassageiro (cpf_par varchar(11), id_usuario_par int)
 LANGUAGE plpgsql
 AS $$
