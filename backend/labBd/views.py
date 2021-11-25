@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 from .models import *
@@ -6,6 +7,7 @@ from .models import *
 from django.db import connection
 from datetime import datetime
 
+@login_required
 def index(request):
     """View principal do projeto"""
 
