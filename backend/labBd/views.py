@@ -26,6 +26,10 @@ def index(request):
     return render(request, 'home.html', context=context)
 
 
+def consultar_oferta_caronas(request):
+    return render(request, 'consulta_oferta_caronas.html')
+
+
 def cadastrar_usuario(request):
     if request.method == 'POST':
         dict_params = request.POST.copy()
@@ -59,7 +63,7 @@ def cadastrar_veiculo(request):
         dict_params = request.POST.copy()
         dict_params.pop('csrfmiddlewaretoken')
         cmd = ''' call CadastroPossui 
-        (2, '{0}','{1}',{3},'{2}','{4}') 
+        (1, '{0}','{1}',{3},'{2}','{4}') 
         '''.format(*dict_params.values())
         
         with connection.cursor() as cursor:
@@ -92,7 +96,9 @@ def cadastrar_oferta_carona(request):
         datatempo = datetime.strptime(dict_params["cad_oferta_data_hora"], '%Y-%m-%dT%H:%M')
         dict_params["cad_oferta_data_hora"] = datatempo.strftime('%Y-%m-%d')
         dict_params["cad_oferta_hora"] = datatempo.strftime('%H:%M:%S')
-        cmd = ''' call cadastro_oferta_carona ({0},{4},'{5}',{1},'{3}','{2}') '''.format(*dict_params.values())
+        cmd = ''' call cadastro_oferta_carona ({0},'{4}','{5}',{1},'{3}','{2}') '''.format(*dict_params.values())
+        with connection.cursor() as cursor:
+            cursor.execute(cmd)
 
     # Trocar depois o segundo parâmetro pro id do motorista
     cmd_veiculos = '''SELECT lista_veiculos_disponiveis('lista_veiculos',1);
