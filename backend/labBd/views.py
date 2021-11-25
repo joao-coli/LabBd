@@ -9,7 +9,7 @@ def index(request):
     buttons = [
         {'text': 'Cadastrar usuário', 'url': 'cadastro_usuario/'},
         {'text': 'Cadastrar veículo', 'url': 'cadastro_veiculo/'},
-        {'text': 'Procurar carona', 'url': ''},
+        {'text': 'Procurar carona', 'url': 'procurar_carona/'},
         {'text': 'Oferecer carona', 'url': 'cadastro_oferta_carona/'},
         {'text': 'Caronas realizadas', 'url': ''},
         {'text': 'Pontos cadastrados', 'url': 'cadastro_ponto/'}
@@ -30,6 +30,11 @@ def cadastrar_veiculo(request):
     if request.method == 'POST':
         print(request.POST["cad_primeiro_nome"])
     return render(request, 'cadastro_veiculo.html', {'range':range(6)})
+
+def procurar_carona(request):
+    if request.method == 'POST':
+        print(request.POST["cad_local_partida"])
+    return render(request, 'procurar_carona.html')
 
 def cadastrar_ponto(request):
     if request.method == 'POST':
