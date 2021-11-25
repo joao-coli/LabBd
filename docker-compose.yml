@@ -17,7 +17,8 @@ services:
     tty: true
     restart: on-failure:5
     command: >
-      sh -c "gunicorn --workers=4 --reload --chdir conf --bind 0.0.0.0:8000 conf.wsgi:application"
+      sh -c "python3 manage.py migrate
+      && gunicorn --workers=4 --reload --chdir conf --bind 0.0.0.0:8000 conf.wsgi:application"
 
   nginx:
     image: nginx:1.13

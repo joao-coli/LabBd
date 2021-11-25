@@ -114,7 +114,7 @@ class Migration(migrations.Migration):
             ID_Ponto_Destino INT NOT NULL, 
             data_partida DATE NOT NULL, 
             horario_partida TIME NOT NULL, 
-            atraso_aceitável INT NOT NULL, 
+            atraso_aceitavel INT NOT NULL, 
             adiantam_aceitavel INT NOT NULL,
             ativo SMALLINT NOT NULL DEFAULT 1,
 
