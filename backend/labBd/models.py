@@ -1,15 +1,47 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser, PermissionsMixin
 
 
-class Match(models.Model):
-    id_match = models.AutoField(primary_key=True)
-    id_agendamento = models.ForeignKey('Agendamento', models.DO_NOTHING, db_column='id_agendamento')
-    id_oferta_de_carona = models.ForeignKey('OfertaDeCarona', models.DO_NOTHING, db_column='id_oferta_de_carona')
+class Usuario(AbstractUser, PermissionsMixin):
+    id_usuario = models.AutoField(primary_key=True)
+    primeiro_nome = models.CharField(max_length=50)
+    sobrenome = models.CharField(max_length=50)
+    username = models.CharField(max_length=50, unique=True, db_column='login')
+    dominio = models.CharField(max_length=50)
+    data_nasc = models.DateField()
+    num = models.IntegerField()
+    logradouro = models.CharField(max_length=50)
+    cep = models.CharField(max_length=9)
+    ddd1 = models.IntegerField()
+    prefixo1 = models.IntegerField()
+    num1 = models.IntegerField()
+    ddd2 = models.IntegerField(blank=True, null=True)
+    prefixo2 = models.IntegerField(blank=True, null=True)
+    num2 = models.IntegerField(blank=True, null=True)
+    is_active = is_active = models.BooleanField(default=True)
+    is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
+
+    first_name = None
+    last_name = None
+
+    EMAIL_FIELD = 'dominio'
+    REQUIRED_FIELDS = [
+        'primeiro_nome', 'sobrenome', 'data_nasc', 'num', 'logradouro',
+        'cep', 'ddd1', 'prefixo1', 'num1',
+    ]
 
     class Meta:
-        managed = False
-        db_table = '_match'
-        unique_together = (('id_agendamento', 'id_oferta_de_carona'),)
+        managed = True
+        db_table = 'usuario'
+
+    def get_full_name(self):
+        """Retrieve full name of user"""
+        return f"{self.primeiro_nome} {self.sobrenome}"
+
+    def get_short_name(self):
+        """Retrive short name"""
+        return self.primeiro_nome
 
 
 class Agendamento(models.Model):
@@ -120,6 +152,17 @@ class Possui(models.Model):
         unique_together = (('id_motorista', 'placa'),)
 
 
+class Match(models.Model):
+    id_match = models.AutoField(primary_key=True)
+    id_agendamento = models.ForeignKey('Agendamento', models.DO_NOTHING, db_column='id_agendamento')
+    id_oferta_de_carona = models.ForeignKey('OfertaDeCarona', models.DO_NOTHING, db_column='id_oferta_de_carona')
+
+    class Meta:
+        managed = False
+        db_table = '_match'
+        unique_together = (('id_agendamento', 'id_oferta_de_carona'),)
+
+
 class Reserva(models.Model):
     id_reserva = models.AutoField(primary_key=True)
     id_match = models.OneToOneField(Match, models.DO_NOTHING, db_column='id_match')
@@ -127,28 +170,6 @@ class Reserva(models.Model):
     class Meta:
         managed = False
         db_table = 'reserva'
-
-
-class Usuario(models.Model):
-    id_usuario = models.AutoField(primary_key=True)
-    primeiro_nome = models.CharField(max_length=50)
-    sobrenome = models.CharField(max_length=50)
-    login = models.CharField(max_length=50)
-    dominio = models.CharField(max_length=50)
-    data_nasc = models.DateField()
-    num = models.IntegerField()
-    logradouro = models.CharField(max_length=50)
-    cep = models.CharField(max_length=9)
-    ddd1 = models.IntegerField()
-    prefixo1 = models.IntegerField()
-    num1 = models.IntegerField()
-    ddd2 = models.IntegerField(blank=True, null=True)
-    prefixo2 = models.IntegerField(blank=True, null=True)
-    num2 = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'usuario'
 
 
 class Veiculo(models.Model):
