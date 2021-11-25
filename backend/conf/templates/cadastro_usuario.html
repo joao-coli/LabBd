@@ -4,6 +4,27 @@
 
 <form class="form-control" method='POST'>{% csrf_token %}
      <div class="form-group">
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option2" name="cad_cbox_passageiro">
+    <label class="form-check-label" for="inlineCheckbox2">Passageiro</label>
+  </div>
+  <div class="row">
+    <div class="col mb-4">
+      <input type="text" class="form-control" placeholder="CPF" name="cad_cpf">
+    </div>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2" name="cad_cbox_motorista">
+    <label class="form-check-label" for="inlineCheckbox2">Motorista</label>
+  </div>
+  <div class="row">
+    <div class="col mb-4">
+      <input type="text" class="form-control" placeholder="Número CNH" name="cad_numero_cnh">
+    </div>
+    <div class="col mb-4">
+      <input type="text" class="form-control" placeholder="Validade CNH" name="cad_validade_cnh">
+    </div>
+  </div>
   <div class="row">
     <div class="col mb-4">
       <input type="text" class="form-control" placeholder="Primeiro Nome" name="cad_primeiro_nome">
@@ -24,6 +45,18 @@
       <input type="text" class="form-control" placeholder="Data de Nascimento" name="cad_data_nascimento">
     </div>
    </div>
+
+   <div class="row">
+    <div class="col mb-4">
+      <input type="text" class="form-control" placeholder="Logradouro" name="cad_logradouro">
+    </div>
+    <div class="col mb-4">
+      <input type="text" class="form-control" placeholder="Numero" name="cad_numero">
+    </div>
+    <div class="col mb-4">
+      <input type="text" class="form-control" placeholder="CEP" name="cad_cep">
+    </div>
+  </div>
 
   <div class="row">
     <div class="col-1 mb-4">
@@ -46,43 +79,6 @@
       <input type="text" class="form-control" placeholder="Telefone 2" name="cad_telefone2">
     </div>
  </div>
-
- <div class="row">
-    <div class="col mb-4">
-      <input type="text" class="form-control" placeholder="Logradouro" name="cad_logradouro">
-    </div>
-    <div class="col mb-4">
-      <input type="text" class="form-control" placeholder="Numero" name="cad_numero">
-    </div>
-    <div class="col mb-4">
-      <input type="text" class="form-control" placeholder="CEP" name="cad_cep">
-    </div>
- </div>
-
- <div class="form-check form-check-inline">
-  <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2" name="cad_cbox_motorista">
-  <label class="form-check-label" for="inlineCheckbox2">Motorista</label>
-</div>
-
- <div class="row">
-    <div class="col mb-4">
-      <input type="text" class="form-control" placeholder="Número CNH" name="cad_numero_cnh">
-    </div>
-    <div class="col mb-4">
-      <input type="text" class="form-control" placeholder="Validade CNH" name="cad_validade_cnh">
-    </div>
-</div>
-
-<div class="form-check form-check-inline">
-  <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option2" name="cad_cbox_passageiro">
-  <label class="form-check-label" for="inlineCheckbox2">Passageiro</label>
-</div>
-
- <div class="row">
-    <div class="col mb-4">
-      <input type="text" class="form-control" placeholder="CPF" name="cad_cpf">
-    </div>
-</div>
 </div>
  <center> <button type="submit" class="btn btn-primary">Cadastrar</button> </center>
 </form>

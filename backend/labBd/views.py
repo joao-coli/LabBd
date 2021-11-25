@@ -26,15 +26,27 @@ def index(request):
 
 def cadastrar_usuario(request):
     if request.method == 'POST':
+        dict_params = request.POST.copy()
+        dict_params.pop('csrfmiddlewaretoken')
         if 'cad_cbox_motorista' in request.POST.keys():
+            dict_params.pop('cad_cbox_motorista')
             if 'cad_cbox_passageiro' in request.POST.keys():
                 print("Cadastra os dois")
+                dict_params.pop('cad_cbox_passageiro')
+                cmd = ''' call cadastropassageiromotorista ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}',{9},'{10}',{11},{12},{13},{14},{15},{16}) '''.format(*dict_params.values())
             else:
+                dict_params.pop('cad_cpf')
                 print("Cadastra só o motorista")
+                cmd = ''' call cadastromotorista ('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}',{8},'{9}',{10},{11},{12},{13},{14},{15}) '''.format(*dict_params.values())
         elif 'cad_cbox_passageiro' in request.POST.keys():
+            dict_params.pop('cad_cbox_passageiro') 
+            dict_params.pop('cad_numero_cnh')
+            dict_params.pop('cad_validade_cnh')
             print('Cadastra só passageiro')
+            cmd = ''' call cadastropassageiro ('{0}','{1}','{2}','{3}','{4}','{5}','{6}',{7},'{8}',{9},{10},{11},{12},{13},{14}) '''.format(*dict_params.values())
+        else:
+            return render(request, 'cadastro_usuario.html')
             
-        cmd = ''' call cadastrousuario ('{0}','{1}','{2}','{3}','{4}',{5},'{6}','{7}',{8},{9},{10},{11},{12},{13}) '''.format(request.POST['cad_primeiro_nome'], request.POST['cad_sobrenome'], 'login', 'dominio', '01/01/2001', 56, 'Rua Imp', '181818', 11, 1, 123, 22, 2, 234)
         with connection.cursor() as cursor:
             cursor.execute(cmd)
 
