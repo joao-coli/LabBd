@@ -182,9 +182,9 @@ CREATE OR REPLACE FUNCTION insere_oferta_carona(ID_Possui_Ofertante in INT, data
     DECLARE
     id_oferta_carona INTEGER;
     BEGIN
-        INSERT INTO OFERTA_DE_CARONA (ID_Possui,data_partida,horario_partida,vagas_ofertadas)
+        INSERT INTO OFERTA_DE_CARONA (ID_Possui,data_partida,horario_partida,vagas_ofertadas, vagas_disponiveis)
                               VALUES (ID_Possui_Ofertante, data_partida_oferta, hora_partida_oferta, 
-                                      n_vagas_oferta) RETURNING id_oferta_de_carona into id_oferta_carona;
+                                      n_vagas_oferta, n_vagas_oferta) RETURNING id_oferta_de_carona into id_oferta_carona;
         RETURN id_oferta_carona;
         COMMIT;
     END; $$;
