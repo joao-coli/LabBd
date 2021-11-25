@@ -200,3 +200,16 @@ CREATE OR REPLACE PROCEDURE insere_passa_por(ID_oferta_de_carona_p in INTEGER,id
 
 CREATE OR REPLACE VIEW pontos_registrados AS SELECT
   * FROM ponto;
+
+CREATE OR REPLACE VIEW lista_caronas_oferecidas AS
+SELECT o.data_partida, 
+	o.horario_partida,
+	o.vagas_ofertadas,
+	o.vagas_disponiveis,
+	v.modelo, 
+	v.placa,
+	moto.id_usuario
+    FROM oferta_de_carona o 
+	INNER JOIN possui p ON (o.id_possui = p.id_possui)
+	INNER JOIN veiculo v ON (p.placa = v.placa)
+	INNER JOIN motorista moto ON (p.id_motorista = moto.id_usuario)
