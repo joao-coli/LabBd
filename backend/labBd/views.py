@@ -50,8 +50,8 @@ def consultar_oferta_caronas(request):
     vagas_disponiveis as "Vagas Disponíveis",
     modelo as "Modelo do veículo", 
     placa as "Placa"
-    FROM lista_caronas_oferecidas WHERE id_usuario = 1 
-    ''' # trocar id usuario
+    FROM lista_caronas_oferecidas WHERE id_usuario = {} 
+    '''.format(request.user.id_usuario)
     with connection.cursor() as cursor:
         cursor.execute(cmd)
         caronas_oferecidas = cursor.fetchall()
@@ -107,8 +107,8 @@ def cadastrar_veiculo(request):
         dict_params = request.POST.copy()
         dict_params.pop('csrfmiddlewaretoken')
         cmd = ''' call CadastroPossui 
-        (1, '{0}','{1}',{3},'{2}','{4}') 
-        '''.format(*dict_params.values())
+        ({5},'{0}','{1}',{3},'{2}','{4}') 
+        '''.format(*dict_params.values(), request.user.id_usuario)
         
         with connection.cursor() as cursor:
             cursor.execute(cmd)
@@ -147,8 +147,8 @@ def cadastrar_oferta_carona(request):
             cursor.execute(cmd)
 
     # Trocar depois o segundo parâmetro pro id do motorista
-    cmd_veiculos = '''SELECT lista_veiculos_disponiveis('lista_veiculos',1); # precisa id_usuario
-            FETCH ALL FROM lista_veiculos'''
+    cmd_veiculos = '''SELECT lista_veiculos_disponiveis('lista_veiculos',{});
+            FETCH ALL FROM lista_veiculos'''.format(request.user.id_usuario)
     cmd_pontos = '''SELECT pontos('pontos');
                     FETCH ALL FROM pontos'''
     with connection.cursor() as cursor:
