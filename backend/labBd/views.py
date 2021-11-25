@@ -1,7 +1,9 @@
 from django.shortcuts import render
 
 from django.http import HttpResponse
+from .models import *
 
+from django.db import connection
 
 def index(request):
     """View principal do projeto"""
@@ -21,9 +23,18 @@ def index(request):
 
     return render(request, 'home.html', context=context)
 
+
 def cadastrar_usuario(request):
     if request.method == 'POST':
-        print(request.POST["cad_primeiro_nome"])
+        if 'cad_cbox_motorista' in request.POST.keys():
+            print('motorista')
+
+        if 'cad_cbox_passageiro' in request.POST.keys():
+            print('passageiro')
+        cmd = ''' call cadastrousuario ('{0}','{1}','{2}','{3}','{4}',{5},'{6}','{7}',{8},{9},{10},{11},{12},{13}) '''.format(request.POST['cad_primeiro_nome'], request.POST['cad_sobrenome'], 'login', 'dominio', '01/01/2001', 56, 'Rua Imp', '181818', 11, 1, 123, 22, 2, 234)
+        with connection.cursor() as cursor:
+            cursor.execute(cmd)
+
     return render(request, 'cadastro_usuario.html')
 
 def cadastrar_veiculo(request):
