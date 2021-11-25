@@ -15,7 +15,8 @@ def index(request):
         {'text': 'Procurar carona', 'url': 'procurar_carona/'},
         {'text': 'Oferecer carona', 'url': 'cadastro_oferta_carona/'},
         {'text': 'Caronas realizadas', 'url': ''},
-        {'text': 'Pontos cadastrados', 'url': 'cadastro_ponto/'}
+        {'text': 'Pontos cadastrados', 'url': 'listar_pontos/'}
+        #{'text': 'Cadastrar Ponto', 'url': 'cadastro_ponto/'}
     ]
 
     context = {
@@ -122,3 +123,10 @@ def cadastrar_oferta_carona(request):
         pontos = cursor.fetchall()
     return render(request, 'cadastro_oferta_carona.html', 
         {'range':range(6), 'lista_veiculos':lista_veiculos, 'pontos': pontos})
+
+def listar_pontos(request):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nome, ponto_referencia, CEP FROM pontos_registrados ORDER BY nome ")
+        pontos = cursor.fetchall()
+    return render(request, 'listar_pontos.html', {'pontos':pontos})
+    return render(request, 'listar_pontos.html')

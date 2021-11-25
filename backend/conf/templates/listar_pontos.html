@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<h1 class="row justify-content-center">Pontos Registrados</h1>
+<hr>
+
+
+<div class="row justify-content-center">
+  <div class="col-4 mb-4">
+    <table class="table">
+      <tr>
+        <th scope="col">#</th> 
+        <th scope="col">NOME</th>
+        <th scope="col">REFERÊNCIA</th> 
+        <th scope="col">CEP</th> 
+      </tr>
+        {% for row0 in pontos %} 
+      <tr>
+        <td scope="row"></td>
+        <td>{{ row0.0 }}</td>
+        <td>{{ row0.1 }}</td>
+        <td>{{ row0.2 }}</td>
+            {% endfor %}
+      </tr>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
