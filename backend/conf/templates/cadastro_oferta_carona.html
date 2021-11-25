@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<body>
+      <b><p style="text-align:center;">Veículo</p></b>
+</body>
+
+<hr>
+
+<form class="form-control" method='POST'>{% csrf_token %}
+     <div class="form-group">
+  <div class="row">
+
+    <div class="col mb-4">
+      <select id="" class="form-select" name="cad_oferta_carona_veiculos">
+        <option selected>Veículo</option>
+        {% for i in range %}
+          <option value={{ forloop.counter }}>Veiculo {{ forloop.counter }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col mb-4">
+        <select id="" class="form-select" name="cad_oferta_carona_lugares">
+          <option selected>Vagas</option>
+          {% for i in range %}
+            <option value={{ forloop.counter }}>{{ forloop.counter }}</option>
+          {% endfor %}
+       </select>
+    </div>
+  </div>
+
+<body>
+      <b><p style="text-align:center;">Ponto Inicial</p></b>
+</body>
+
+<hr>
+
+  <div class="row">
+    <center> 
+      <div class="col mb-4">
+        <input type="text" class="form-control" placeholder="Endereço" name="cad_oferta_carona_endereco">
+      </div>
+      <button type="submit" class="btn btn-primary" style='background-color:gray'>Adicionar Ponto</button>
+    </center>
+  </div>
+
+
+<body>
+      <b><p style="text-align:center;">Data e Hora de partida</p></b>
+</body>
+
+<hr>
+
+<div class="row">
+    <div class="col mb-4">
+      <input type="text" class="form-control" placeholder="dd/mm/yyyy - hh:mm" name="cad_oferta_carona_endereco">
+    </div>
+  </div>
+
+</div class="row">
+ <center> 
+   <button type="submit" class="btn btn-primary" style='background-color:green'>Cadastrar</button>
+   <button type="submit" class="btn btn-primary" >Editar</button> 
+   <button type="submit" class="btn btn-primary " style='background-color:red'>Deletar</button> 
+ </center>
+</form>
+
+{% endblock %}

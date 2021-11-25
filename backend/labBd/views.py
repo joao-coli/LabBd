@@ -10,7 +10,7 @@ def index(request):
         {'text': 'Cadastrar usuário', 'url': 'cadastro_usuario/'},
         {'text': 'Cadastrar veículo', 'url': ''},
         {'text': 'Procurar carona', 'url': ''},
-        {'text': 'Oferecer carona', 'url': ''},
+        {'text': 'Oferecer carona', 'url': 'cadastro_oferta_carona/'},
         {'text': 'Caronas realizadas', 'url': ''},
         {'text': 'Pontos cadastrados', 'url': 'cadastro_ponto/'}
     ]
@@ -31,3 +31,8 @@ def cadastrar_ponto(request):
     if request.method == 'POST':
         print(request.POST["cad_ponto_nome"])
     return render(request, 'cadastro_ponto.html')
+
+def cadastrar_oferta_carona(request):
+    if request.method == 'POST':
+        print(request.POST["cad_oferta_carona_veiculo"])
+    return render(request, 'cadastro_oferta_carona.html', {'range':range(6)})
