@@ -27,7 +27,7 @@ def index(request):
 
     return render(request, 'home.html', context=context)
 
-
+@login_required
 def consultar_oferta_caronas(request):
     cmd = ''' SELECT data_partida as "Data Partida",
     horario_partida as "Horário partida",
@@ -35,14 +35,14 @@ def consultar_oferta_caronas(request):
     vagas_disponiveis as "Vagas Disponíveis",
     modelo as "Modelo do veículo", 
     placa as "Placa"
-    FROM lista_caronas_oferecidas WHERE id_usuario = 1
-    '''
+    FROM lista_caronas_oferecidas WHERE id_usuario = 1 
+    ''' # trocar id usuario
     with connection.cursor() as cursor:
         cursor.execute(cmd)
         caronas_oferecidas = cursor.fetchall()
     return render(request, 'consulta_oferta_caronas.html',{'caronas_oferecidas': caronas_oferecidas})
 
-
+@login_required
 def cadastrar_usuario(request):
     if request.method == 'POST':
         dict_params = request.POST.copy()
@@ -71,6 +71,7 @@ def cadastrar_usuario(request):
 
     return render(request, 'cadastro_usuario.html')
 
+@login_required
 def cadastrar_veiculo(request):
     if request.method == 'POST':
         dict_params = request.POST.copy()
@@ -84,11 +85,13 @@ def cadastrar_veiculo(request):
 
     return render(request, 'cadastro_veiculo.html', {'range':range(6)})
 
+@login_required
 def procurar_carona(request):
     if request.method == 'POST':
         print(request.POST["cad_local_partida"])
     return render(request, 'procurar_carona.html')
 
+@login_required
 def cadastrar_ponto(request):
     if request.method == 'POST':
         dict_params = request.POST.copy()
@@ -101,7 +104,7 @@ def cadastrar_ponto(request):
     return render(request, 'cadastro_ponto.html')
 
 
-
+@login_required
 def cadastrar_oferta_carona(request):
     if request.method == 'POST':
         dict_params = request.POST.copy()
@@ -114,7 +117,7 @@ def cadastrar_oferta_carona(request):
             cursor.execute(cmd)
 
     # Trocar depois o segundo parâmetro pro id do motorista
-    cmd_veiculos = '''SELECT lista_veiculos_disponiveis('lista_veiculos',1);
+    cmd_veiculos = '''SELECT lista_veiculos_disponiveis('lista_veiculos',1); # precisa id_usuario
             FETCH ALL FROM lista_veiculos'''
     cmd_pontos = '''SELECT pontos('pontos');
                     FETCH ALL FROM pontos'''
@@ -126,6 +129,7 @@ def cadastrar_oferta_carona(request):
     return render(request, 'cadastro_oferta_carona.html', 
         {'range':range(6), 'lista_veiculos':lista_veiculos, 'pontos': pontos})
 
+@login_required
 def listar_pontos(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT nome, ponto_referencia, CEP FROM pontos_registrados ORDER BY nome ")
