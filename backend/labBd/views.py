@@ -74,8 +74,16 @@ def procurar_carona(request):
 
 def cadastrar_ponto(request):
     if request.method == 'POST':
-        print(request.POST["cad_ponto_nome"])
+        dict_params = request.POST.copy()
+        dict_params.pop('csrfmiddlewaretoken')
+        cmd = ''' call insere_ponto ({2},{3},'{6}',{5},'{4}','{0}','{1}') '''.format(*dict_params.values())
+
+        with connection.cursor() as cursor:
+            cursor.execute(cmd)
+            
     return render(request, 'cadastro_ponto.html')
+
+
 
 def cadastrar_oferta_carona(request):
     if request.method == 'POST':
