@@ -26,7 +26,18 @@ def index(request):
 
 
 def consultar_oferta_caronas(request):
-    return render(request, 'consulta_oferta_caronas.html')
+    cmd = ''' SELECT data_partida as "Data Partida",
+    horario_partida as "Horário partida",
+    vagas_ofertadas as "Vagas Ofertadas",
+    vagas_disponiveis as "Vagas Disponíveis",
+    modelo as "Modelo do veículo", 
+    placa as "Placa"
+    FROM lista_caronas_oferecidas WHERE id_usuario = 1
+    '''
+    with connection.cursor() as cursor:
+        cursor.execute(cmd)
+        caronas_oferecidas = cursor.fetchall()
+    return render(request, 'consulta_oferta_caronas.html',{'caronas_oferecidas': caronas_oferecidas})
 
 
 def cadastrar_usuario(request):
