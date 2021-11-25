@@ -25,7 +25,7 @@
    <div class="row justify-content-center">
       <div class="col-3 mb-4">
         <select class="form-select" name="lugares">
-          <option selected>Lugares</option>
+          <option disabled selected hidden>Lugares</option>
           {% for i in range %}
             <option value={{ forloop.counter }}>{{ forloop.counter }}</option>
           {% endfor %}

@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from .models import *
 
 from django.db import connection
+from datetime import datetime
 
 def index(request):
     """View principal do projeto"""
@@ -85,5 +86,24 @@ def cadastrar_ponto(request):
 
 def cadastrar_oferta_carona(request):
     if request.method == 'POST':
-        print(request.POST["cad_oferta_carona_veiculo"])
-    return render(request, 'cadastro_oferta_carona.html', {'range':range(6)})
+        dict_params = request.POST.copy()
+        dict_params.pop('csrfmiddlewaretoken')
+        datatempo = datetime.strptime(dict_params["cad_oferta_data_hora"], '%Y-%m-%dT%H:%M')
+        dict_params["cad_oferta_data_hora"] = datatempo.strftime('%Y-%m-%d')
+        dict_params["cad_oferta_hora"] = datatempo.strftime('%H:%M:%S')
+        print("AAAAAAAAAAAAAAAAAAAAAAAA", dict_params.keys())
+        # CALL cadastro_oferta_carona(3,current_date, localtime,4, 1, 2);
+        cmd = ''' call cadastro_oferta_carona ({0},{4},'{5}',{1},'{3}','{2}') '''.format(*dict_params.values())
+
+    # Trocar depois o segundo parâmetro pro id do motorista
+    cmd_veiculos = '''SELECT lista_veiculos_disponiveis('lista_veiculos',1);
+            FETCH ALL FROM lista_veiculos'''
+    cmd_pontos = '''SELECT pontos('pontos');
+                    FETCH ALL FROM pontos'''
+    with connection.cursor() as cursor:
+        cursor.execute(cmd_veiculos)
+        lista_veiculos = cursor.fetchall()
+        cursor.execute(cmd_pontos)
+        pontos = cursor.fetchall()
+    return render(request, 'cadastro_oferta_carona.html', 
+        {'range':range(6), 'lista_veiculos':lista_veiculos, 'pontos': pontos})

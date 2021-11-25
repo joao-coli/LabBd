@@ -2,11 +2,11 @@
 
 {% block content %}
 
-<body>
-      <b><p style="text-align:center;">Veículo</p></b>
-</body>
+<h1><b><p style="text-align:center;">Oferecer Carona</p></b></h1>
+
 
 <hr>
+<h3><p style="text-align:center;">Veículo</p></h3>
 
 <form class="form-control" method='POST'>{% csrf_token %}
      <div class="form-group">
@@ -14,16 +14,16 @@
 
     <div class="col mb-4">
       <select id="" class="form-select" name="cad_oferta_carona_veiculos">
-        <option selected>Veículo</option>
-        {% for i in range %}
-          <option value={{ forloop.counter }}>Veiculo {{ forloop.counter }}</option>
+        <option disabled selected hidden>Veículo</option>
+        {% for i in lista_veiculos %}
+          <option value={{ i.0 }}>{{ i.1 }} - {{ i.2 }} - {{ i.4 }}</option>
         {% endfor %}
       </select>
     </div>
 
     <div class="col mb-4">
         <select id="" class="form-select" name="cad_oferta_carona_lugares">
-          <option selected>Vagas</option>
+          <option disabled selected hidden>Vagas</option>
           {% for i in range %}
             <option value={{ forloop.counter }}>{{ forloop.counter }}</option>
           {% endfor %}
@@ -31,42 +31,44 @@
     </div>
   </div>
 
-<body>
-      <b><p style="text-align:center;">Ponto Inicial</p></b>
-</body>
+  <h3><p style="text-align:center;"><b><p style="text-align:center;">Ponto Inicial</p></h3>
 
-<hr>
+  <hr>
 
-<div class="col mb-4">
-  <input type="text" class="form-control" placeholder="Endereço" name="cad_oferta_carona_endereco">
-</div>
-
-  <div class="row justify-content-center" >
-      <div class="col-2 mb-4">
-        <select id="" class="form-select" name="cad_oferta_carona_pontos">
-          <option selected>Ponto</option>
-            {% for i in range %}
-              <option value={{ forloop.counter }}>Ponto {{ forloop.counter }}</option>
-            {% endfor %}
+  <div class="col mb-4">
+        <select id="" class="form-select" name="ponto_inicial">
+          <option disabled selected hidden>Ponto Inicial</option>
+          {% for i in pontos %}
+            <option value={{ i.0 }}>{{ i.1 }} - {{ i.2 }} - {{ i.3 }}</option>
+          {% endfor %}
        </select>
-      </div>
-
-      <div class="col-2 mb-4">
-        <button type="submit" class="btn btn-primary" style='background-color:gray'>Adicionar Ponto</button>
-      </div>
-
   </div>
 
 
-<body>
-      <b><p style="text-align:center;">Data e Hora de partida</p></b>
-</body>
+  <h3><p style="text-align:center;"><b><p style="text-align:center;">Ponto Final</p></h3>
+
+  <hr>
+
+  <div class="col mb-4">
+        <select id="" class="form-select" name="ponto_final">
+          <option disabled selected hidden>Ponto Final</option>
+          {% for i in pontos %}
+            <option value={{ i.0 }}>{{ i.1 }} - {{ i.2 }} - {{ i.3 }}</option>
+          {% endfor %}
+       </select>
+  </div>
+
+  <hr>
+
+
+
+  <h3><p style="text-align:center;">Data e Hora de partida</p></h3>
 
 <hr>
 
 <div class="row">
     <div class="col mb-4">
-      <input type="text" class="form-control" placeholder="dd/mm/yyyy - hh:mm" name="cad_oferta_carona_endereco">
+      <input type="datetime-local" class="form-control" name="cad_oferta_data_hora">
     </div>
   </div>
 
