@@ -7,7 +7,7 @@ DECLARE
 id_user INTEGER;
 BEGIN
 --comandos
-    INSERT INTO usuario ("password", email, date_joined, primeiro_nome, sobrenome, login, dominio, data_nasc,num, logradouro, CEP, DDD1, prefixo1, num1, DDD2, prefixo2, num2, is_active, is_superuser, is_staff)
+    INSERT INTO usuario ('password', email, date_joined, primeiro_nome, sobrenome, login, dominio, data_nasc,num, logradouro, CEP, DDD1, prefixo1, num1, DDD2, prefixo2, num2, is_active, is_superuser, is_staff)
                          VALUES (pass, 'lab_bd@gmail.com', localtimestamp, primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par,num_par, logradouro_par, CEP_par, DDD1_par, prefixo1_par, num1_par, DDD2_par, prefixo2_par, num2_par, 'true', 'false', 'false')
                          RETURNING id_usuario into id_user;
                          
@@ -99,7 +99,7 @@ BEGIN
     COMMIT;
 END; $$;
 
-CREATE PROCEDURE insere_ponto (_latitude in int, _longitude in int, 
+CREATE OR REPLACE PROCEDURE insere_ponto (_latitude in int, _longitude in int, 
                                _cep in varchar, _num in int,
                                _logradouro in varchar, _nome in varchar, 
                                _ponto_referencia in varchar DEFAULT NULL::varchar)
@@ -212,7 +212,7 @@ SELECT o.data_partida,
     FROM oferta_de_carona o 
     INNER JOIN possui p ON (o.id_possui = p.id_possui)
     INNER JOIN veiculo v ON (p.placa = v.placa)
-    INNER JOIN motorista moto ON (p.id_motorista = moto.id_usuario)
+    INNER JOIN motorista moto ON (p.id_motorista = moto.id_usuario);
     
 CREATE OR REPLACE FUNCTION insere_agendamento (_cpf in varchar(11), _horario_agendamento in timestamp, 
                                _id_ponto_origem in int, _id_ponto_destino in int,
@@ -230,7 +230,7 @@ BEGIN
            _horario_partida, _atraso_aceitavel, _adiantamento_aceitavel, _ativo) returning id_agendamento into id_agend;
     RETURN id_agend;
     COMMIT;
-END; $$
+END; $$;
 
 CREATE OR REPLACE FUNCTION gera_match() RETURNS trigger
 LANGUAGE plpgsql
@@ -250,7 +250,7 @@ BEGIN
 
     RETURN NEW;
     COMMIT;
-END; $$
+END; $$;
 
 
 CREATE TRIGGER trigger_gera_match AFTER INSERT ON agendamento
@@ -271,4 +271,133 @@ SELECT m.id_agendamento, o.data_partida, o.horario_partida, o.vagas_disponiveis,
     INNER JOIN motorista mot ON (mot.id_usuario = p.id_motorista)
     INNER JOIN usuario u ON (u.id_usuario = mot.id_usuario)
     INNER JOIN veiculo v ON (v.placa = p.placa)
+
+------------------------------------------------TRIGGERS
+CREATE OR REPLACE FUNCTION process_vagas_disponiveis() RETURNS TRIGGER AS $process_vagas_disponiveis$
+DECLARE
+    ocupadas INTEGER;
+    ofertadas INTEGER;
+    delta INTEGER;
+    id_oferta INTEGER;
+BEGIN
+    IF EXISTS(select id_oferta_de_carona FROM _match where id_oferta_de_carona=OLD.id_oferta_de_carona) THEN
+        id_oferta := OLD.id_oferta_de_carona;
+    ELSE
+        id_oferta := NEW.id_oferta_de_carona;
+    END IF;
+
+    ocupadas := (SELECT COUNT(*) FROM _match WHERE id_oferta_de_carona = id_oferta);
+    ofertadas := (SELECT vagas_ofertadas FROM oferta_de_carona WHERE id_oferta_de_carona = id_oferta);
+    delta := ofertadas - ocupadas;
+
+    UPDATE oferta_de_carona SET vagas_disponiveis = delta WHERE id_oferta_de_carona = id_oferta;
+    RETURN NULL;
+END;
+$process_vagas_disponiveis$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_vagas_disponiveis AFTER INSERT OR DELETE ON _match 
+FOR EACH ROW EXECUTE FUNCTION process_vagas_disponiveis();
+
+---------------------------------------------TRIGGER
+
+CREATE FUNCTION calcula_nota_media_motorista() RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE 
+    media real;
+    media_motorista real;
+    cod_motorista int;
+BEGIN
+    SELECT moto.id_usuario, SUM(c.nota_motorista)/CAST(COUNT(c.nota_motorista) AS real) INTO cod_motorista, media_motorista 
+    FROM carona c 
+    INNER JOIN reserva r ON (c.id_reserva = r.id_reserva)
+    INNER JOIN _match m ON (r.id_match = m.id_match)
+    INNER JOIN oferta_de_carona o ON (m.id_oferta_de_carona = o.id_oferta_de_carona)
+    INNER JOIN possui p ON (o.id_possui = p.id_possui)
+    INNER JOIN motorista moto ON (p.id_motorista = moto.id_usuario)
+    WHERE c.id_reserva = NEW.id_reserva
+    GROUP BY moto.id_usuario;
     
+    
+    UPDATE Motorista set nota_media = media_motorista where id_usuario = cod_motorista;
+    
+    RETURN NEW;
+    COMMIT;
+END; $$;
+
+CREATE TRIGGER atualiza_nota_media_motorista AFTER UPDATE ON CARONA
+    FOR EACH ROW EXECUTE PROCEDURE calcula_nota_media_motorista();
+    
+-------------------------------------------------- TRIGGER
+    CREATE OR REPLACE FUNCTION verifica_disponib_passageiro()
+ RETURNS trigger LANGUAGE plpgsql AS $$ 
+BEGIN
+    IF exists (SELECT 1 FROM AGENDAMENTO A 
+               WHERE A.horario_partida = NEW.horario_partida
+                    AND A.data_partida = NEW.data_partida) 
+        THEN RAISE EXCEPTION 'Horário indisponível';
+    
+    END IF;
+    RETURN NEW;
+END; $$;
+
+CREATE OR REPLACE FUNCTION verifica_disponib_passageiro()
+ RETURNS trigger LANGUAGE plpgsql AS $$ 
+BEGIN
+    IF exists (SELECT 1 FROM AGENDAMENTO A 
+               WHERE A.horario_partida = NEW.horario_partida
+                    AND A.data_partida = NEW.data_partida) 
+        THEN RAISE EXCEPTION 'Horário indisponível';
+    
+    END IF;
+    RETURN NEW;
+END; $$;
+
+CREATE TRIGGER trig_verifica_disponib_passageiro BEFORE INSERT ON AGENDAMENTO
+    FOR EACH ROW EXECUTE PROCEDURE verifica_disponib_passageiro();
+    
+---------------------------------------------------- TRIGGER
+CREATE OR REPLACE FUNCTION reativa_agendamento() RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE agendamento SET ativo = 1 where id_agendamento IN (
+        SELECT ma.id_agendamento
+        FROM _match AS ma
+        INNER JOIN reserva AS re on ma.id_match = re.id_match
+        WHERE ma.id_oferta_de_carona = old.id_oferta_de_carona
+    );    
+    RETURN OLD;
+    COMMIT;
+END; $$;
+
+CREATE TRIGGER ativa_agendamentos BEFORE DELETE ON oferta_de_carona
+    FOR EACH ROW EXECUTE PROCEDURE reativa_agendamento();
+    
+    
+--------------------------------------------------- TRIGGER
+-- Função que retorna um trigger para verificar se um veículo está disponível
+CREATE OR REPLACE FUNCTION function_checa_veiculo_carona()
+  RETURNS trigger AS
+$$
+BEGIN
+   IF exists 
+       (select oc.ID_Oferta_de_carona from oferta_de_carona oc
+        INNER JOIN possui p on p.id_possui = oc.id_possui
+        INNER JOIN veiculo v on v.placa = p.placa
+        
+        WHERE (oc.data_partida = NEW.data_partida)
+       )
+        THEN RAISE EXCEPTION 'Carro indisponível';
+   END IF;
+   RETURN NEW;
+END
+$$  LANGUAGE plpgsql;
+
+-- Criando o trigger que vai chamar a função acima para ativar a verificação
+CREATE TRIGGER trigger_checa_veiculo_carona
+    BEFORE INSERT ON oferta_de_carona
+    FOR EACH ROW EXECUTE PROCEDURE function_checa_veiculo_carona();
+
+
+insert into usuario ("password", email, date_joined, primeiro_nome, sobrenome, login, dominio, data_nasc, num, logradouro, CEP, DDD1, prefixo1, num1, is_active, is_superuser, is_staff) values ('pbkdf2_sha256$180000$uFowwgSjJmsq$AP/LsAIOSmCbeVL03jzizkSrQrctR2723zqvDyLktIU='  ,  '', '2021-11-26 16:51:18.975534+00'  , 'Italo Antonio', 'Oliveira','oliveiit', '', '1999-09-09', 58,'Rua Imp', '18147000' , 11 , 1 , 123456, 'true' , 'true','true')
