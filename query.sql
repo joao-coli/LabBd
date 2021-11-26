@@ -213,3 +213,18 @@ SELECT o.data_partida,
     INNER JOIN possui p ON (o.id_possui = p.id_possui)
     INNER JOIN veiculo v ON (p.placa = v.placa)
     INNER JOIN motorista moto ON (p.id_motorista = moto.id_usuario)
+    
+CREATE OR REPLACE PROCEDURE insere_agendamento (_cpf in varchar(11), _horario_agendamento in timestamp, 
+                               _id_ponto_origem in int, _id_ponto_destino in int,
+                               _data_partida in date, _horario_partida in time, 
+                               _atraso_aceitavel in int, _adiantamento_aceitavel in int,
+                               _ativo in int default 1)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    insert into agendamento (cpf, horario_agendamento, id_ponto_origem, id_ponto_destino, 
+                             data_partida, horario_partida, atraso_aceitavel, adiantam_aceitavel, ativo) 
+    values(_cpf,_horario_agendamento, _id_ponto_origem, _id_ponto_destino, _data_partida, 
+           _horario_partida, _atraso_aceitavel, _adiantamento_aceitavel, _ativo);
+    COMMIT;
+END; $$
