@@ -7,7 +7,7 @@ DECLARE
 id_user INTEGER;
 BEGIN
 --comandos
-    INSERT INTO usuario ('password', email, date_joined, primeiro_nome, sobrenome, login, dominio, data_nasc,num, logradouro, CEP, DDD1, prefixo1, num1, DDD2, prefixo2, num2, is_active, is_superuser, is_staff)
+    INSERT INTO usuario ("password", email, date_joined, primeiro_nome, sobrenome, login, dominio, data_nasc,num, logradouro, CEP, DDD1, prefixo1, num1, DDD2, prefixo2, num2, is_active, is_superuser, is_staff)
                          VALUES (pass, 'lab_bd@gmail.com', localtimestamp, primeiro_nome_par, sobrenome_par, login_par, dominio_par, data_nasc_par,num_par, logradouro_par, CEP_par, DDD1_par, prefixo1_par, num1_par, DDD2_par, prefixo2_par, num2_par, 'true', 'false', 'false')
                          RETURNING id_usuario into id_user;
                          
@@ -270,7 +270,7 @@ SELECT m.id_agendamento, o.data_partida, o.horario_partida, o.vagas_disponiveis,
     INNER JOIN possui p ON (p.id_possui = o.id_possui)
     INNER JOIN motorista mot ON (mot.id_usuario = p.id_motorista)
     INNER JOIN usuario u ON (u.id_usuario = mot.id_usuario)
-    INNER JOIN veiculo v ON (v.placa = p.placa)
+    INNER JOIN veiculo v ON (v.placa = p.placa);
 
 ------------------------------------------------TRIGGERS
 CREATE OR REPLACE FUNCTION process_vagas_disponiveis() RETURNS TRIGGER AS $process_vagas_disponiveis$
