@@ -253,3 +253,17 @@ END; $$
 
 CREATE TRIGGER trigger_gera_match AFTER INSERT ON agendamento
     FOR EACH ROW EXECUTE PROCEDURE gera_match();
+
+-- Lista de passageiros que aceitaram uma determinada carona
+-- criação
+CREATE OR REPLACE VIEW PassageirosAceitaramCarona AS
+SELECT  PE.cpf, 
+        US.id_usuario,
+        id_match,
+        primeiro_nome,
+        sobrenome
+FROM PASSAGEIRO PE
+    INNER JOIN USUARIO US ON PE.id_usuario = US.id_usuario
+    INNER JOIN (
+        SELECT * FROM AGENDAMENTO INNER JOIN _MATCH ON AGENDAMENTO.id_agendamento = _MATCH.id_agendamento
+    ) AG ON PE.cpf = AG.cpf;
