@@ -228,3 +228,28 @@ BEGIN
            _horario_partida, _atraso_aceitavel, _adiantamento_aceitavel, _ativo);
     COMMIT;
 END; $$
+
+
+CREATE OR REPLACE FUNCTION gera_match() RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+datahora timestamp;
+matchview record;
+BEGIN
+    datahora = new.data_partida + new.horario_partida;
+    for matchview in select ID_Oferta_de_carona from oferta_de_carona oc
+    WHERE (data_partida + horario_partida) >= (datahora - new.adiantam_aceitavel * interval '1 minute')
+    AND (data_partida + horario_partida) <= (datahora + new.atraso_aceitavel * interval '1 minute')
+    AND (new.id_ponto_origem in (select id_ponto from passa_por p where p.id_oferta_de_carona = oc.id_oferta_de_carona))
+    AND (new.id_ponto_destino in (select id_ponto from passa_por p where p.id_oferta_de_carona = oc.id_oferta_de_carona)) LOOP
+        insert into _match (id_agendamento, id_oferta_de_carona) values (new.id_agendamento, matchview.id_oferta_de_carona);
+   END LOOP;
+
+    RETURN NEW;
+    COMMIT;
+END; $$
+
+
+CREATE TRIGGER trigger_gera_match AFTER INSERT ON agendamento
+    FOR EACH ROW EXECUTE PROCEDURE gera_match();
