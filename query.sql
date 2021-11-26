@@ -267,3 +267,52 @@ FROM PASSAGEIRO PE
     INNER JOIN (
         SELECT * FROM AGENDAMENTO INNER JOIN _MATCH ON AGENDAMENTO.id_agendamento = _MATCH.id_agendamento
     ) AG ON PE.cpf = AG.cpf;
+
+
+
+-- desenvolvimento da function que retorna uma trigger como resultado
+CREATE OR REPLACE FUNCTION process_vagas_disponiveis() RETURNS TRIGGER AS $process_vagas_disponiveis$
+DECLARE
+    ocupadas INTEGER;
+    ofertadas INTEGER;
+    delta INTEGER;
+    id_oferta INTEGER;
+BEGIN
+    IF EXISTS(select id_oferta_de_carona FROM _match where id_oferta_de_carona=OLD.id_oferta_de_carona) THEN
+        id_oferta := OLD.id_oferta_de_carona;
+    ELSE
+        id_oferta := NEW.id_oferta_de_carona;
+    END IF;
+
+    ocupadas := (SELECT COUNT(*) FROM _match WHERE id_oferta_de_carona = id_oferta);
+    ofertadas := (SELECT vagas_ofertadas FROM oferta_de_carona WHERE id_oferta_de_carona = id_oferta);
+    delta := ofertadas - ocupadas;
+
+    -- update a oferta de carona de acordo com o numero de usuários que confirmaram a viagem
+    UPDATE oferta_de_carona SET vagas_disponiveis = delta WHERE id_oferta_de_carona = id_oferta;
+    RETURN NULL;
+END;
+$process_vagas_disponiveis$ LANGUAGE plpgsql;
+
+-- criação da trigger para ser disparada após uma inserção ou deleção na relação _match
+CREATE TRIGGER update_vagas_disponiveis AFTER INSERT OR DELETE ON _match 
+FOR EACH ROW EXECUTE FUNCTION process_vagas_disponiveis();
+
+
+-- function que realiza a busca e retorna um cursor como referência
+-- PASSO 1
+CREATE OR REPLACE FUNCTION get_pontos(cur_get_pontos REFCURSOR, endereco CHARACTER VARYING) RETURNS REFCURSOR
+AS
+$$
+DECLARE
+    local_logradouro CHARACTER VARYING;
+BEGIN
+    local_logradouro := '%' || endereco || '%';
+    OPEN cur_get_pontos FOR SELECT id_ponto, nome, logradouro, num, cep FROM ponto WHERE logradouro ILIKE local_logradouro;
+    RETURN cur_get_pontos;
+END;
+$$ LANGUAGE plpgsql;
+
+-- PASSO 2
+-- SELECT get_pontos('cur_get_pontos','Luiz');
+-- FETCH 1 IN cur_get_pontos;
