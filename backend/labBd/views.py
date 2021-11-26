@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
@@ -127,15 +128,16 @@ def procurar_carona(request):
         with connection.cursor() as cursor:
             cursor.execute(cmd_cpf)
             cpf = cursor.fetchall()
-        print("AAAAAAAAAAAAAAAAAAAA",type(cpf[0][0]))
         dict_params["cad_cpf"] = cpf[0][0]
         dict_params["cad_hora_agendamento"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        cmd = ''' call insere_agendamento ('{0}','{1}',{2},{3},'{4}','{5}',{6},{7}) '''.format(
+        cmd = '''select insere_agendamento ('{0}','{1}',{2},{3},'{4}','{5}',{6},{7}) '''.format(
             dict_params['cad_cpf'], dict_params['cad_hora_agendamento'], dict_params['cad_local_partida'], dict_params['cad_local_chegada'],
             dict_params['cad_data_horario_partida'], dict_params['cad_hora_partida'], dict_params['cad_atraso_aceitavel'],
             dict_params['cad_adiantamento_aceitavel'])
         with connection.cursor() as cursor:
             cursor.execute(cmd)
+            id_agend = cursor.fetchall()
+        return redirect(reverse('listar_matches', args = (id_agend[0][0],)))
     
     cmd_pontos = '''SELECT pontos('pontos');
         FETCH ALL FROM pontos'''
@@ -188,4 +190,11 @@ def listar_pontos(request):
         cursor.execute("SELECT nome, ponto_referencia, CEP FROM pontos_registrados ORDER BY nome ")
         pontos = cursor.fetchall()
     return render(request, 'listar_pontos.html', {'pontos':pontos})
-    return render(request, 'listar_pontos.html')
+
+@login_required
+def listar_matches(request, id_agend):
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM lista_matches where id_agendamento = {}".format(id_agend))
+        matches = cursor.fetchall()
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAA", matches)
+    return render(request, 'listar_matches.html', {'matches':matches})

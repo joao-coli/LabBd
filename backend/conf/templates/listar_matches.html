@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<h1 class="row justify-content-center">Caronas Encontradas</h1>
+<hr>
+
+
+<div class="row justify-content-center">
+  <div class="col-10 mb-4">
+    <table class="table">
+      <tr>
+        <th scope="col">#</th> 
+        <th scope="col">MOTORISTA</th>
+        <th scope="col">VEÍCULO</th> 
+        <th scope="col">VAGAS DISPONÍVEIS</th> 
+        <th scope="col">DATA PARTIDA</th> 
+        <th scope="col">HORA PARTIDA</th> 
+        <th scope="col">ORIGEM</th>
+        <th scope="col">DESTINO</th>  
+      </tr>
+        {% for row in matches %} 
+      <tr>
+        <td scope="row"></td>
+        <td>{{ row.6 }}</td>
+        <td>{{ row.9 }}</td>
+        <td>{{ row.3 }}</td>
+        <td>{{ row.1 }}</td>
+        <td>{{ row.2 }}</td>
+        <td>{{ row.4 }}</td>
+        <td>{{ row.5 }}</td>
+            {% endfor %}
+      </tr>
+    </table>
+  </div>
+</div>
+
+
+
+{% endblock %}
