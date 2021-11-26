@@ -214,21 +214,23 @@ SELECT o.data_partida,
     INNER JOIN veiculo v ON (p.placa = v.placa)
     INNER JOIN motorista moto ON (p.id_motorista = moto.id_usuario)
     
-CREATE OR REPLACE PROCEDURE insere_agendamento (_cpf in varchar(11), _horario_agendamento in timestamp, 
+CREATE OR REPLACE FUNCTION insere_agendamento (_cpf in varchar(11), _horario_agendamento in timestamp, 
                                _id_ponto_origem in int, _id_ponto_destino in int,
                                _data_partida in date, _horario_partida in time, 
                                _atraso_aceitavel in int, _adiantamento_aceitavel in int,
-                               _ativo in int default 1)
+                               _ativo in int default 1) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
+DECLARE
+id_agend INTEGER;
 BEGIN
     insert into agendamento (cpf, horario_agendamento, id_ponto_origem, id_ponto_destino, 
                              data_partida, horario_partida, atraso_aceitavel, adiantam_aceitavel, ativo) 
     values(_cpf,_horario_agendamento, _id_ponto_origem, _id_ponto_destino, _data_partida, 
-           _horario_partida, _atraso_aceitavel, _adiantamento_aceitavel, _ativo);
+           _horario_partida, _atraso_aceitavel, _adiantamento_aceitavel, _ativo) returning id_agendamento into id_agend;
+    RETURN id_agend;
     COMMIT;
 END; $$
-
 
 CREATE OR REPLACE FUNCTION gera_match() RETURNS trigger
 LANGUAGE plpgsql
@@ -254,65 +256,19 @@ END; $$
 CREATE TRIGGER trigger_gera_match AFTER INSERT ON agendamento
     FOR EACH ROW EXECUTE PROCEDURE gera_match();
 
--- Lista de passageiros que aceitaram uma determinada carona
--- criação
-CREATE OR REPLACE VIEW PassageirosAceitaramCarona AS
-SELECT  PE.cpf, 
-        US.id_usuario,
-        id_match,
-        primeiro_nome,
-        sobrenome
-FROM PASSAGEIRO PE
-    INNER JOIN USUARIO US ON PE.id_usuario = US.id_usuario
-    INNER JOIN (
-        SELECT * FROM AGENDAMENTO INNER JOIN _MATCH ON AGENDAMENTO.id_agendamento = _MATCH.id_agendamento
-    ) AG ON PE.cpf = AG.cpf;
 
-
-
--- desenvolvimento da function que retorna uma trigger como resultado
-CREATE OR REPLACE FUNCTION process_vagas_disponiveis() RETURNS TRIGGER AS $process_vagas_disponiveis$
-DECLARE
-    ocupadas INTEGER;
-    ofertadas INTEGER;
-    delta INTEGER;
-    id_oferta INTEGER;
-BEGIN
-    IF EXISTS(select id_oferta_de_carona FROM _match where id_oferta_de_carona=OLD.id_oferta_de_carona) THEN
-        id_oferta := OLD.id_oferta_de_carona;
-    ELSE
-        id_oferta := NEW.id_oferta_de_carona;
-    END IF;
-
-    ocupadas := (SELECT COUNT(*) FROM _match WHERE id_oferta_de_carona = id_oferta);
-    ofertadas := (SELECT vagas_ofertadas FROM oferta_de_carona WHERE id_oferta_de_carona = id_oferta);
-    delta := ofertadas - ocupadas;
-
-    -- update a oferta de carona de acordo com o numero de usuários que confirmaram a viagem
-    UPDATE oferta_de_carona SET vagas_disponiveis = delta WHERE id_oferta_de_carona = id_oferta;
-    RETURN NULL;
-END;
-$process_vagas_disponiveis$ LANGUAGE plpgsql;
-
--- criação da trigger para ser disparada após uma inserção ou deleção na relação _match
-CREATE TRIGGER update_vagas_disponiveis AFTER INSERT OR DELETE ON _match 
-FOR EACH ROW EXECUTE FUNCTION process_vagas_disponiveis();
-
-
--- function que realiza a busca e retorna um cursor como referência
--- PASSO 1
-CREATE OR REPLACE FUNCTION get_pontos(cur_get_pontos REFCURSOR, endereco CHARACTER VARYING) RETURNS REFCURSOR
-AS
-$$
-DECLARE
-    local_logradouro CHARACTER VARYING;
-BEGIN
-    local_logradouro := '%' || endereco || '%';
-    OPEN cur_get_pontos FOR SELECT id_ponto, nome, logradouro, num, cep FROM ponto WHERE logradouro ILIKE local_logradouro;
-    RETURN cur_get_pontos;
-END;
-$$ LANGUAGE plpgsql;
-
--- PASSO 2
--- SELECT get_pontos('cur_get_pontos','Luiz');
--- FETCH 1 IN cur_get_pontos;
+CREATE VIEW lista_matches AS
+SELECT m.id_agendamento, o.data_partida, o.horario_partida, o.vagas_disponiveis, po_origem.nome as ponto_origem, po_destino.nome as ponto_destino,
+    u.primeiro_nome, mot.nota_media, mot.data_validade_cnh, v.modelo, v.n_assentos
+    FROM _match m 
+    INNER JOIN agendamento a ON (m.id_agendamento = a.id_agendamento)
+    INNER JOIN oferta_de_carona o ON (o.id_oferta_de_carona = m.id_oferta_de_carona)
+    INNER JOIN passa_por p_destino ON (p_destino.id_oferta_de_carona = o.id_oferta_de_carona AND p_destino.ponto_final = true)
+    INNER JOIN passa_por p_origem ON (p_origem.id_oferta_de_carona = o.id_oferta_de_carona AND p_origem.ponto_inicial = true)
+    INNER JOIN ponto po_origem ON (p_origem.id_ponto = po_origem.id_ponto)
+    INNER JOIN ponto po_destino ON (p_destino.id_ponto = po_destino.id_ponto)
+    INNER JOIN possui p ON (p.id_possui = o.id_possui)
+    INNER JOIN motorista mot ON (mot.id_usuario = p.id_motorista)
+    INNER JOIN usuario u ON (u.id_usuario = mot.id_usuario)
+    INNER JOIN veiculo v ON (v.placa = p.placa)
+    
