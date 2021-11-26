@@ -118,8 +118,32 @@ def cadastrar_veiculo(request):
 @login_required
 def procurar_carona(request):
     if request.method == 'POST':
-        print(request.POST["cad_local_partida"])
-    return render(request, 'procurar_carona.html')
+        dict_params = request.POST.copy()
+        dict_params.pop('csrfmiddlewaretoken')
+        datatempo = datetime.strptime(dict_params["cad_data_horario_partida"], '%Y-%m-%dT%H:%M')
+        dict_params["cad_data_horario_partida"] = datatempo.strftime('%Y-%m-%d')
+        dict_params["cad_hora_partida"] = datatempo.strftime('%H:%M:%S')
+        cmd_cpf = "SELECT cpf FROM passageiro where id_usuario = {}".format(request.user.id_usuario)
+        with connection.cursor() as cursor:
+            cursor.execute(cmd_cpf)
+            cpf = cursor.fetchall()
+        print("AAAAAAAAAAAAAAAAAAAA",type(cpf[0][0]))
+        dict_params["cad_cpf"] = cpf[0][0]
+        dict_params["cad_hora_agendamento"] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        cmd = ''' call insere_agendamento ('{0}','{1}',{2},{3},'{4}','{5}',{6},{7}) '''.format(
+            dict_params['cad_cpf'], dict_params['cad_hora_agendamento'], dict_params['cad_local_partida'], dict_params['cad_local_chegada'],
+            dict_params['cad_data_horario_partida'], dict_params['cad_hora_partida'], dict_params['cad_atraso_aceitavel'],
+            dict_params['cad_adiantamento_aceitavel'])
+        with connection.cursor() as cursor:
+            cursor.execute(cmd)
+    
+    cmd_pontos = '''SELECT pontos('pontos');
+        FETCH ALL FROM pontos'''
+    with connection.cursor() as cursor:
+        cursor.execute(cmd_pontos)
+        pontos = cursor.fetchall()
+    return render(request, 'procurar_carona.html', 
+        {'pontos': pontos})
 
 @login_required
 def cadastrar_ponto(request):
@@ -146,7 +170,6 @@ def cadastrar_oferta_carona(request):
         with connection.cursor() as cursor:
             cursor.execute(cmd)
 
-    # Trocar depois o segundo parâmetro pro id do motorista
     cmd_veiculos = '''SELECT lista_veiculos_disponiveis('lista_veiculos',{});
             FETCH ALL FROM lista_veiculos'''.format(request.user.id_usuario)
     cmd_pontos = '''SELECT pontos('pontos');

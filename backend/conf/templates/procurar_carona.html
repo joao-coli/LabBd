@@ -8,13 +8,19 @@
      <div class="form-group">
   <div class="row justify-content-center">
     <div class="col-3 mb-4">
-      <select id="local_partida" name="cad_local_partida" class="form-control">
+      <select id="local_partida" name="cad_local_partida" class="form-control" name="cad_local_partida">
         <option value="" class="form-control" disabled selected hidden>Local de Partida</option>
+        {% for i in pontos %}
+          <option value={{ i.0 }}>{{ i.1 }} - {{ i.2 }} - {{ i.3 }}</option>
+        {% endfor %}
       </select>
     </div>
     <div class="col-3 mb-4">
-      <select id="local_chegada" name="cad_local_chegada" class="form-control">
+      <select id="local_chegada" name="cad_local_chegada" class="form-control" name="cad_local_chegada">
         <option value="" class="form-control" disabled selected hidden>Local de Chegada</option>
+        {% for i in pontos %}
+          <option value={{ i.0 }}>{{ i.1 }} - {{ i.2 }} - {{ i.3 }}</option>
+        {% endfor %}
       </select>
     </div>
   </div>
